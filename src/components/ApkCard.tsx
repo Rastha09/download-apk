@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { Download, Copy, Check, Calendar, HardDrive, Smartphone } from "lucide-react";
+import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Swal from "sweetalert2";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ApkCardProps {
   id: string;
@@ -10,23 +11,29 @@ interface ApkCardProps {
   version: string;
   description: string;
   fileName: string;
+  filePath: string;
   downloadUrl: string;
   fileSize?: number;
   createdAt: string;
   index: number;
+  onDelete?: () => void;
 }
 
 export function ApkCard({
+  id,
   appName,
   version,
   description,
   fileName,
+  filePath,
   downloadUrl,
   fileSize,
   createdAt,
   index,
+  onDelete,
 }: ApkCardProps) {
   const [copied, setCopied] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "Unknown size";
@@ -70,7 +77,6 @@ export function ApkCard({
   };
 
   const handleDownload = () => {
-    // Create a temporary anchor element for direct download
     const link = document.createElement("a");
     link.href = downloadUrl;
     link.download = fileName;
@@ -78,6 +84,59 @@ export function ApkCard({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: "Hapus APK?",
+      text: `Apakah Anda yakin ingin menghapus "${appName}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "hsl(0 84.2% 60.2%)",
+      cancelButtonColor: "hsl(var(--muted))",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      setDeleting(true);
+      try {
+        // Delete file from storage
+        const { error: storageError } = await supabase.storage
+          .from("apk-files")
+          .remove([filePath]);
+
+        if (storageError) throw storageError;
+
+        // Delete record from database
+        const { error: dbError } = await supabase
+          .from("apk_uploads")
+          .delete()
+          .eq("id", id);
+
+        if (dbError) throw dbError;
+
+        Swal.fire({
+          icon: "success",
+          title: "Terhapus!",
+          text: "APK berhasil dihapus.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        onDelete?.();
+      } catch (error) {
+        console.error("Error deleting APK:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Gagal Menghapus",
+          text: "Terjadi kesalahan saat menghapus APK.",
+          confirmButtonColor: "hsl(145 65% 42%)",
+        });
+      } finally {
+        setDeleting(false);
+      }
+    }
   };
 
   return (
@@ -145,14 +204,24 @@ export function ApkCard({
           </div>
         </div>
 
-        {/* Download Button */}
-        <Button
-          onClick={handleDownload}
-          className="w-full h-11 font-semibold gradient-success hover:opacity-90 transition-opacity"
-        >
-          <Download className="w-5 h-5 mr-2" />
-          Download APK
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            onClick={handleDownload}
+            className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity"
+          >
+            <Download className="w-5 h-5 mr-2" />
+            Download
+          </Button>
+          <Button
+            onClick={handleDelete}
+            disabled={deleting}
+            variant="outline"
+            className="h-11 px-3 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+          >
+            <Trash2 className={`w-5 h-5 ${deleting ? "animate-pulse" : ""}`} />
+          </Button>
+        </div>
       </div>
     </motion.div>
   );
