@@ -12,6 +12,7 @@ interface ApkUpload {
   version: string;
   description: string;
   file_name: string;
+  file_path: string;
   download_url: string;
   file_size: number | null;
   created_at: string;
@@ -142,10 +143,12 @@ export function ApkList({ refreshTrigger }: ApkListProps) {
               version={apk.version}
               description={apk.description}
               fileName={apk.file_name}
+              filePath={apk.file_path}
               downloadUrl={apk.download_url}
               fileSize={apk.file_size ?? undefined}
               createdAt={apk.created_at}
               index={index}
+              onDelete={fetchApks}
             />
           ))}
         </div>
