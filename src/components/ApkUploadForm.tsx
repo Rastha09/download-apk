@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import Swal from "sweetalert2";
 
@@ -18,6 +19,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
   const [description, setDescription] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -96,6 +98,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
 
     try {
       // Generate unique file path
@@ -103,12 +106,40 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       const sanitizedName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, "_");
       const filePath = `${timestamp}_${sanitizedName}`;
 
-      // Upload file to storage
-      const { error: uploadError } = await supabase.storage
-        .from("apk-files")
-        .upload(filePath, selectedFile);
-
-      if (uploadError) throw uploadError;
+      // Upload file to storage with progress tracking using XMLHttpRequest
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+      
+      const uploadUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/apk-files/${filePath}`;
+      
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percentComplete);
+          }
+        });
+        
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error(`Upload failed with status ${xhr.status}`));
+          }
+        });
+        
+        xhr.addEventListener("error", () => {
+          reject(new Error("Upload failed"));
+        });
+        
+        xhr.open("POST", uploadUrl);
+        xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+        xhr.setRequestHeader("apikey", import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+        xhr.setRequestHeader("Content-Type", selectedFile.type || "application/octet-stream");
+        xhr.send(selectedFile);
+      });
 
       // Get public URL
       const { data: urlData } = supabase.storage
@@ -156,6 +187,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       });
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -283,6 +315,16 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
             </div>
           </div>
 
+          {isUploading && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Uploading...</span>
+                <span className="font-medium text-foreground">{uploadProgress}%</span>
+              </div>
+              <Progress value={uploadProgress} className="h-2" />
+            </div>
+          )}
+
           <Button
             type="submit"
             disabled={isUploading}
@@ -291,7 +333,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
             {isUploading ? (
               <>
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Uploading...
+                Uploading... {uploadProgress}%
               </>
             ) : (
               <>
