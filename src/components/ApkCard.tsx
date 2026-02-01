@@ -17,6 +17,7 @@ interface ApkCardProps {
   createdAt: string;
   index: number;
   onDelete?: () => void;
+  showDelete?: boolean;
 }
 
 export function ApkCard({
@@ -31,6 +32,7 @@ export function ApkCard({
   createdAt,
   index,
   onDelete,
+  showDelete = false,
 }: ApkCardProps) {
   const [copied, setCopied] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -213,14 +215,16 @@ export function ApkCard({
             <Download className="w-5 h-5 mr-2" />
             Download
           </Button>
-          <Button
-            onClick={handleDelete}
-            disabled={deleting}
-            variant="outline"
-            className="h-11 px-3 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-          >
-            <Trash2 className={`w-5 h-5 ${deleting ? "animate-pulse" : ""}`} />
-          </Button>
+          {showDelete && (
+            <Button
+              onClick={handleDelete}
+              disabled={deleting}
+              variant="outline"
+              className="h-11 px-3 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <Trash2 className={`w-5 h-5 ${deleting ? "animate-pulse" : ""}`} />
+            </Button>
+          )}
         </div>
       </div>
     </motion.div>
