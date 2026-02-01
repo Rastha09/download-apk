@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2 } from "lucide-react";
+import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +37,8 @@ export function ApkCard({
 }: ApkCardProps) {
   const [copied, setCopied] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "Unknown size";
@@ -78,14 +81,70 @@ export function ApkCard({
     }
   };
 
-  const handleDownload = () => {
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = fileName;
-    link.target = "_blank";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async () => {
+    setDownloading(true);
+    setDownloadProgress(0);
+
+    try {
+      const response = await fetch(downloadUrl);
+      const contentLength = response.headers.get("content-length");
+      const total = contentLength ? parseInt(contentLength, 10) : 0;
+
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const reader = response.body.getReader();
+      const chunks: Uint8Array[] = [];
+      let received = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        chunks.push(value);
+        received += value.length;
+
+        if (total > 0) {
+          const percentComplete = Math.round((received / total) * 100);
+          setDownloadProgress(percentComplete);
+        }
+      }
+
+      // Combine chunks into a single Blob
+      const blob = new Blob(chunks as BlobPart[], { type: "application/vnd.android.package-archive" });
+      const url = URL.createObjectURL(blob);
+
+      // Trigger download
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      Swal.fire({
+        icon: "success",
+        title: "Download Complete!",
+        text: `${appName} has been downloaded.`,
+        timer: 2000,
+        showConfirmButton: false,
+        toast: true,
+        position: "top-end",
+      });
+    } catch (error) {
+      console.error("Download error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Download Failed",
+        text: "Could not download the file. Please try again.",
+        confirmButtonColor: "hsl(145 65% 42%)",
+      });
+    } finally {
+      setDownloading(false);
+      setDownloadProgress(0);
+    }
   };
 
   const handleDelete = async () => {
@@ -206,19 +265,40 @@ export function ApkCard({
           </div>
         </div>
 
+        {/* Download Progress */}
+        {downloading && (
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Downloading...</span>
+              <span className="font-medium text-foreground">{downloadProgress}%</span>
+            </div>
+            <Progress value={downloadProgress} className="h-2" />
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="flex gap-2">
           <Button
             onClick={handleDownload}
+            disabled={downloading || deleting}
             className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity"
           >
-            <Download className="w-5 h-5 mr-2" />
-            Download
+            {downloading ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                {downloadProgress}%
+              </>
+            ) : (
+              <>
+                <Download className="w-5 h-5 mr-2" />
+                Download
+              </>
+            )}
           </Button>
           {showDelete && (
             <Button
               onClick={handleDelete}
-              disabled={deleting}
+              disabled={deleting || downloading}
               variant="outline"
               className="h-11 px-3 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
             >
