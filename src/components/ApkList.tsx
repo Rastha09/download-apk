@@ -20,9 +20,10 @@ interface ApkUpload {
 
 interface ApkListProps {
   refreshTrigger: number;
+  isAdmin?: boolean;
 }
 
-export function ApkList({ refreshTrigger }: ApkListProps) {
+export function ApkList({ refreshTrigger, isAdmin = false }: ApkListProps) {
   const [apks, setApks] = useState<ApkUpload[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -149,6 +150,7 @@ export function ApkList({ refreshTrigger }: ApkListProps) {
               createdAt={apk.created_at}
               index={index}
               onDelete={fetchApks}
+              showDelete={isAdmin}
             />
           ))}
         </div>
