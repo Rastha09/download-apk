@@ -17,6 +17,25 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
+
+  const handleCancelUpload = () => {
+    if (xhrRef.current) {
+      xhrRef.current.abort();
+      xhrRef.current = null;
+      setIsUploading(false);
+      setUploadProgress(0);
+      Swal.fire({
+        icon: "info",
+        title: "Upload Dibatalkan",
+        text: "Proses upload telah dibatalkan.",
+        timer: 1500,
+        showConfirmButton: false,
+        toast: true,
+        position: "top-end",
+      });
+    }
+  };
 
   // Extract app name and version from filename
   const extractAppInfo = (fileName: string) => {
@@ -147,6 +166,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
+        xhrRef.current = xhr;
         
         xhr.upload.addEventListener("progress", (event) => {
           if (event.lengthComputable) {
@@ -156,6 +176,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
         });
         
         xhr.addEventListener("load", () => {
+          xhrRef.current = null;
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve();
           } else {
@@ -164,7 +185,13 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
         });
         
         xhr.addEventListener("error", () => {
+          xhrRef.current = null;
           reject(new Error("Upload failed"));
+        });
+
+        xhr.addEventListener("abort", () => {
+          xhrRef.current = null;
+          reject(new Error("Upload cancelled"));
         });
         
         xhr.open("POST", uploadUrl);
@@ -208,6 +235,10 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
 
       onUploadSuccess();
     } catch (error: any) {
+      // Don't show error for cancelled uploads
+      if (error.message === "Upload cancelled") {
+        return;
+      }
       console.error("Upload error:", error);
       Swal.fire({
         icon: "error",
@@ -318,23 +349,36 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
             </div>
           )}
 
-          <Button
-            type="submit"
-            disabled={isUploading}
-            className="w-full h-12 text-base font-semibold gradient-hero hover:opacity-90 transition-opacity"
-          >
-            {isUploading ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Uploading... {uploadProgress}%
-              </>
-            ) : (
-              <>
-                <Upload className="w-5 h-5 mr-2" />
-                Upload APK
-              </>
+          <div className="flex gap-3">
+            <Button
+              type="submit"
+              disabled={isUploading}
+              className="flex-1 h-12 text-base font-semibold gradient-hero hover:opacity-90 transition-opacity"
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Uploading... {uploadProgress}%
+                </>
+              ) : (
+                <>
+                  <Upload className="w-5 h-5 mr-2" />
+                  Upload APK
+                </>
+              )}
+            </Button>
+            {isUploading && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancelUpload}
+                className="h-12 px-4 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              >
+                <X className="w-5 h-5 mr-1" />
+                Batal
+              </Button>
             )}
-          </Button>
+          </div>
         </form>
       </div>
     </motion.div>

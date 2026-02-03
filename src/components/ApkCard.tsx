@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Loader2 } from "lucide-react";
+import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Swal from "sweetalert2";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -39,6 +39,25 @@ export function ApkCard({
   const [deleting, setDeleting] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const handleCancelDownload = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setDownloading(false);
+      setDownloadProgress(0);
+      Swal.fire({
+        icon: "info",
+        title: "Download Dibatalkan",
+        text: "Proses download telah dibatalkan.",
+        timer: 1500,
+        showConfirmButton: false,
+        toast: true,
+        position: "top-end",
+      });
+    }
+  };
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "Unknown size";
@@ -85,8 +104,11 @@ export function ApkCard({
     setDownloading(true);
     setDownloadProgress(0);
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
-      const response = await fetch(downloadUrl);
+      const response = await fetch(downloadUrl, { signal: controller.signal });
       const contentLength = response.headers.get("content-length");
       const total = contentLength ? parseInt(contentLength, 10) : 0;
 
@@ -111,6 +133,8 @@ export function ApkCard({
         }
       }
 
+      abortControllerRef.current = null;
+
       // Combine chunks into a single Blob
       const blob = new Blob(chunks as BlobPart[], { type: "application/vnd.android.package-archive" });
       const url = URL.createObjectURL(blob);
@@ -133,7 +157,12 @@ export function ApkCard({
         toast: true,
         position: "top-end",
       });
-    } catch (error) {
+    } catch (error: any) {
+      abortControllerRef.current = null;
+      // Don't show error for cancelled downloads
+      if (error.name === "AbortError") {
+        return;
+      }
       console.error("Download error:", error);
       Swal.fire({
         icon: "error",
@@ -278,23 +307,25 @@ export function ApkCard({
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          <Button
-            onClick={handleDownload}
-            disabled={downloading || deleting}
-            className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity"
-          >
-            {downloading ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                {downloadProgress}%
-              </>
-            ) : (
-              <>
-                <Download className="w-5 h-5 mr-2" />
-                Download
-              </>
-            )}
-          </Button>
+          {downloading ? (
+            <Button
+              onClick={handleCancelDownload}
+              variant="outline"
+              className="flex-1 h-11 font-semibold border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <X className="w-5 h-5 mr-2" />
+              Batalkan ({downloadProgress}%)
+            </Button>
+          ) : (
+            <Button
+              onClick={handleDownload}
+              disabled={deleting}
+              className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity"
+            >
+              <Download className="w-5 h-5 mr-2" />
+              Download
+            </Button>
+          )}
           {showDelete && (
             <Button
               onClick={handleDelete}
