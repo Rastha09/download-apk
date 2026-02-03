@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Loader2, X } from "lucide-react";
+import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Loader2, X, Package, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useState, useRef } from "react";
@@ -239,14 +239,44 @@ export function ApkCard({
       <div className="p-5 md:p-6">
         {/* Header */}
         <div className="flex items-start gap-4 mb-4">
-          <div className="w-12 h-12 rounded-xl gradient-hero flex items-center justify-center flex-shrink-0 shadow-glow">
-            <Smartphone className="w-6 h-6 text-primary-foreground" />
+          <div className="relative">
+            <div className="w-12 h-12 rounded-xl gradient-hero flex items-center justify-center flex-shrink-0 shadow-glow">
+              <Smartphone className="w-6 h-6 text-primary-foreground" />
+            </div>
+            {/* File type badge */}
+            <div 
+              className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase flex items-center gap-0.5 ${
+                fileName.toLowerCase().endsWith('.apks') 
+                  ? 'bg-purple-500 text-white' 
+                  : 'bg-emerald-500 text-white'
+              }`}
+            >
+              {fileName.toLowerCase().endsWith('.apks') ? (
+                <>
+                  <Layers className="w-2.5 h-2.5" />
+                  <span>S</span>
+                </>
+              ) : (
+                <>
+                  <Package className="w-2.5 h-2.5" />
+                </>
+              )}
+            </div>
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-bold text-foreground truncate">{appName}</h3>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
                 v{version}
+              </span>
+              <span 
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                  fileName.toLowerCase().endsWith('.apks') 
+                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' 
+                    : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                }`}
+              >
+                {fileName.toLowerCase().endsWith('.apks') ? 'APKS Bundle' : 'APK'}
               </span>
               <span className="text-xs text-muted-foreground">
                 {formatFileSize(fileSize)}
