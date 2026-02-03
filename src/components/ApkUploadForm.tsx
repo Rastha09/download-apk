@@ -45,11 +45,12 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
 
   const validateAndSetFile = (file: File) => {
     // Check file extension
-    if (!file.name.toLowerCase().endsWith(".apk")) {
+    const fileName = file.name.toLowerCase();
+    if (!fileName.endsWith(".apk") && !fileName.endsWith(".apks")) {
       Swal.fire({
         icon: "error",
         title: "Invalid File",
-        text: "Only .apk files are allowed!",
+        text: "Only .apk and .apks files are allowed!",
         confirmButtonColor: "hsl(145 65% 42%)",
       });
       return;
@@ -265,7 +266,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".apk"
+                accept=".apk,.apks"
                 onChange={handleFileChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 disabled={isUploading}
@@ -304,7 +305,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
                   </div>
                   <div>
                     <p className="font-medium text-foreground">
-                      Drag & drop your APK file here
+                      Drag & drop your APK/APKS file here
                     </p>
                     <p className="text-sm text-muted-foreground">
                       or click to browse (max 500MB)
