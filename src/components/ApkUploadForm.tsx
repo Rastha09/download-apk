@@ -2,10 +2,8 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Upload, FileUp, Loader2, CheckCircle, X, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import Swal from "sweetalert2";
 
@@ -14,14 +12,44 @@ interface ApkUploadFormProps {
 }
 
 export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
-  const [appName, setAppName] = useState("");
-  const [version, setVersion] = useState("");
-  const [description, setDescription] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Extract app name and version from filename
+  const extractAppInfo = (fileName: string) => {
+    // Remove extension
+    const nameWithoutExt = fileName.replace(/\.(apk|apks)$/i, "");
+    
+    // Try to extract version from common patterns like "AppName_v1.2.3" or "AppName-1.2.3" or "AppName 1.2.3"
+    const versionPatterns = [
+      /[_\-\s]v?(\d+\.\d+(?:\.\d+)?(?:\.\d+)?)/i,  // AppName_v1.2.3 or AppName-1.2.3
+      /[_\-\s](\d+\.\d+(?:\.\d+)?(?:\.\d+)?)$/i,   // AppName_1.2.3 at the end
+    ];
+    
+    let version = "1.0";
+    let appName = nameWithoutExt;
+    
+    for (const pattern of versionPatterns) {
+      const match = nameWithoutExt.match(pattern);
+      if (match) {
+        version = match[1];
+        // Remove version part from app name
+        appName = nameWithoutExt.replace(pattern, "").trim();
+        break;
+      }
+    }
+    
+    // Clean up app name: replace underscores/dashes with spaces, trim
+    appName = appName.replace(/[_\-]+/g, " ").trim();
+    
+    // Capitalize first letter of each word
+    appName = appName.replace(/\b\w/g, (c) => c.toUpperCase());
+    
+    return { appName, version };
+  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -88,15 +116,19 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!appName.trim() || !version.trim() || !description.trim() || !selectedFile) {
+    if (!selectedFile) {
       Swal.fire({
         icon: "warning",
-        title: "Incomplete Form",
-        text: "Please fill in all fields and select an APK file.",
+        title: "No File Selected",
+        text: "Please select an APK or APKS file to upload.",
         confirmButtonColor: "hsl(145 65% 42%)",
       });
       return;
     }
+
+    // Extract app info from filename
+    const { appName, version } = extractAppInfo(selectedFile.name);
+    const description = `Android app package for ${appName}`;
 
     setIsUploading(true);
     setUploadProgress(0);
@@ -151,9 +183,9 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
 
       // Save metadata to database
       const { error: dbError } = await supabase.from("apk_uploads").insert({
-        app_name: appName.trim(),
-        version: version.trim(),
-        description: description.trim(),
+        app_name: appName,
+        version: version,
+        description: description,
         file_name: selectedFile.name,
         file_path: filePath,
         download_url: downloadUrl,
@@ -171,9 +203,6 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       });
 
       // Reset form
-      setAppName("");
-      setVersion("");
-      setDescription("");
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
 
@@ -212,44 +241,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="appName">App Name</Label>
-            <Input
-              id="appName"
-              placeholder="e.g., My Amazing App"
-              value={appName}
-              onChange={(e) => setAppName(e.target.value)}
-              disabled={isUploading}
-              className="h-11"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="version">Version</Label>
-            <Input
-              id="version"
-              placeholder="e.g., 1.0.0"
-              value={version}
-              onChange={(e) => setVersion(e.target.value)}
-              disabled={isUploading}
-              className="h-11"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              placeholder="Brief description of your app..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={isUploading}
-              rows={3}
-              className="resize-none"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>APK File</Label>
+            <Label>APK/APKS File</Label>
             <div
               className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
                 dragActive
