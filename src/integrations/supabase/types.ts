@@ -19,6 +19,7 @@ export type Database = {
           app_name: string
           created_at: string
           description: string
+          download_count: number
           download_url: string
           file_name: string
           file_path: string
@@ -30,6 +31,7 @@ export type Database = {
           app_name: string
           created_at?: string
           description: string
+          download_count?: number
           download_url: string
           file_name: string
           file_path: string
@@ -41,6 +43,7 @@ export type Database = {
           app_name?: string
           created_at?: string
           description?: string
+          download_count?: number
           download_url?: string
           file_name?: string
           file_path?: string
@@ -83,6 +86,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_download_count: { Args: { apk_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"
