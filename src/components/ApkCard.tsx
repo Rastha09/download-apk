@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Loader2, X, Package, Layers } from "lucide-react";
+import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Loader2, X, Package, Layers, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useState, useRef } from "react";
@@ -17,7 +17,9 @@ interface ApkCardProps {
   fileSize?: number;
   createdAt: string;
   index: number;
+  downloadCount: number;
   onDelete?: () => void;
+  onDownloadComplete?: () => void;
   showDelete?: boolean;
 }
 
@@ -32,7 +34,9 @@ export function ApkCard({
   fileSize,
   createdAt,
   index,
+  downloadCount,
   onDelete,
+  onDownloadComplete,
   showDelete = false,
 }: ApkCardProps) {
   const [copied, setCopied] = useState(false);
@@ -147,6 +151,10 @@ export function ApkCard({
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+
+      // Increment download count
+      await supabase.rpc("increment_download_count", { apk_id: id });
+      onDownloadComplete?.();
 
       Swal.fire({
         icon: "success",
@@ -289,7 +297,7 @@ export function ApkCard({
         <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{description}</p>
 
         {/* Meta */}
-        <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+        <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4 flex-wrap">
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5" />
             <span>{formatDate(createdAt)}</span>
@@ -297,6 +305,10 @@ export function ApkCard({
           <div className="flex items-center gap-1.5">
             <HardDrive className="w-3.5 h-3.5" />
             <span className="truncate max-w-[150px]">{fileName}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>{downloadCount.toLocaleString("id-ID")} download</span>
           </div>
         </div>
 

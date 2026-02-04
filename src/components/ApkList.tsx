@@ -15,6 +15,7 @@ interface ApkUpload {
   file_path: string;
   download_url: string;
   file_size: number | null;
+  download_count: number;
   created_at: string;
 }
 
@@ -147,9 +148,11 @@ export function ApkList({ refreshTrigger, isAdmin = false }: ApkListProps) {
               filePath={apk.file_path}
               downloadUrl={apk.download_url}
               fileSize={apk.file_size ?? undefined}
+              downloadCount={apk.download_count}
               createdAt={apk.created_at}
               index={index}
               onDelete={fetchApks}
+              onDownloadComplete={fetchApks}
               showDelete={isAdmin}
             />
           ))}
