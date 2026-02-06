@@ -72,7 +72,7 @@ const Index = () => {
       </div>
 
       {/* Footer */}
-      <footer className="mt-auto py-6 border-t border-border">
+      <footer className="mt-auto py-6 border-t border-border/30 bg-background/30 backdrop-blur-sm">
         <div className="container max-w-7xl mx-auto px-4">
           <p className="text-center text-sm text-muted-foreground">
             © {new Date().getFullYear()} APK Uploader. Share your apps with ease.

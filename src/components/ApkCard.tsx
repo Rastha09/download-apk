@@ -242,7 +242,7 @@ export function ApkCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
-      className="group bg-card/70 backdrop-blur-md rounded-2xl border border-border/50 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
+      className="group bg-card/40 backdrop-blur-sm rounded-2xl border border-border/30 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
     >
       <div className="p-5 md:p-6">
         {/* Header */}
