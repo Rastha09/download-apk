@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { ApkUploadForm } from "@/components/ApkUploadForm";
 import { ApkList } from "@/components/ApkList";
 import { ParticleBackground } from "@/components/ParticleBackground";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -22,7 +23,8 @@ const Index = () => {
       <div className="container max-w-7xl mx-auto px-4 py-8 md:py-12 relative z-10">
         <div className="space-y-8 md:space-y-12">
           {/* Auth Actions */}
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end items-center gap-3">
+            <ThemeToggle />
             {loading ? null : user ? (
               <div className="flex items-center gap-3">
                 {isAdmin && (
