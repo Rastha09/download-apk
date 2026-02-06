@@ -4,6 +4,7 @@ import { LogIn, LogOut, Shield } from "lucide-react";
 import { Header } from "@/components/Header";
 import { ApkUploadForm } from "@/components/ApkUploadForm";
 import { ApkList } from "@/components/ApkList";
+import { ParticleBackground } from "@/components/ParticleBackground";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -16,8 +17,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-7xl mx-auto px-4 py-8 md:py-12">
+    <div className="min-h-screen bg-background relative">
+      <ParticleBackground />
+      <div className="container max-w-7xl mx-auto px-4 py-8 md:py-12 relative z-10">
         <div className="space-y-8 md:space-y-12">
           {/* Auth Actions */}
           <div className="flex justify-end gap-3">
