@@ -31,15 +31,15 @@ export function ParticleBackground() {
     window.addEventListener("resize", resizeCanvas);
 
     // Initialize particles
-    const particleCount = Math.min(80, Math.floor(window.innerWidth / 20));
+    const particleCount = Math.min(120, Math.floor(window.innerWidth / 14));
     particlesRef.current = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      size: Math.random() * 3 + 1,
+      size: Math.random() * 4 + 1.5,
       speedX: (Math.random() - 0.5) * 0.8,
       speedY: (Math.random() - 0.5) * 0.8,
-      opacity: Math.random() * 0.5 + 0.1,
-      hue: Math.random() > 0.5 ? 145 : 175, // Green or teal (matching theme)
+      opacity: Math.random() * 0.6 + 0.3,
+      hue: Math.random() > 0.5 ? 145 : 175,
     }));
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -76,13 +76,13 @@ export function ParticleBackground() {
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 150) {
-            const opacity = (1 - dist / 150) * 0.15;
+          if (dist < 180) {
+            const opacity = (1 - dist / 180) * 0.25;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             ctx.strokeStyle = `hsla(145, 65%, 50%, ${opacity})`;
-            ctx.lineWidth = 0.5;
+            ctx.lineWidth = 0.7;
             ctx.stroke();
           }
         }
@@ -123,7 +123,7 @@ export function ParticleBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.6 }}
+      style={{ opacity: 1 }}
     />
   );
 }
