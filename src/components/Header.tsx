@@ -41,11 +41,15 @@ export function Header() {
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 200, delay: 0.4 }}
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative group cursor-pointer"
           >
+            <div className="absolute -inset-2 rounded-full bg-primary/40 blur-xl group-hover:bg-primary/60 transition-all duration-500 animate-pulse" />
             <img
               src={profileLogo}
               alt="Deimos Logo"
-              className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover ring-3 ring-white/40 shadow-xl"
+              className="relative w-24 h-24 md:w-28 md:h-28 rounded-full object-cover ring-3 ring-white/40 shadow-xl group-hover:ring-white/70 group-hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all duration-300"
             />
           </motion.div>
         </div>
