@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Smartphone, Upload } from "lucide-react";
+import { Smartphone } from "lucide-react";
+import profileLogo from "@/assets/profile.png";
 
 export function Header() {
   return (
@@ -37,15 +38,15 @@ export function Header() {
           </div>
 
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-            className="flex items-center gap-3 bg-white/15 backdrop-blur-md rounded-full px-5 py-2.5"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, delay: 0.4 }}
           >
-            <Upload className="w-5 h-5 text-primary-foreground" />
-            <span className="text-primary-foreground font-medium text-sm">
-              Direct Download Links
-            </span>
+            <img
+              src={profileLogo}
+              alt="Deimos Logo"
+              className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover ring-2 ring-white/30 shadow-lg"
+            />
           </motion.div>
         </div>
       </div>
