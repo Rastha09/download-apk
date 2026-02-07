@@ -21,9 +21,9 @@ const Index = () => {
     <div className="min-h-screen bg-background relative">
       <ParticleBackground />
       <div className="container max-w-7xl mx-auto px-4 py-8 md:py-12 relative z-10">
-        <div className="space-y-8 md:space-y-12">
-          {/* Auth Actions */}
-          <div className="flex justify-end items-center gap-3">
+        {/* Sticky Header Section */}
+        <div className="sticky top-0 z-20 -mx-4 px-4 pt-4 pb-2 bg-background/60 backdrop-blur-md">
+          <div className="flex justify-end items-center gap-3 mb-4">
             <ThemeToggle />
             {loading ? null : user ? (
               <div className="flex items-center gap-3">
@@ -50,9 +50,10 @@ const Index = () => {
               </Link>
             )}
           </div>
-
-          {/* Header */}
           <Header />
+        </div>
+
+        <div className="space-y-8 md:space-y-12 mt-6">
 
           {/* Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
