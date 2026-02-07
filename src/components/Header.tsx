@@ -45,7 +45,7 @@ export function Header() {
             <img
               src={profileLogo}
               alt="Deimos Logo"
-              className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover ring-2 ring-white/30 shadow-lg"
+              className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover ring-3 ring-white/40 shadow-xl"
             />
           </motion.div>
         </div>
