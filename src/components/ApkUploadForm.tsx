@@ -1,10 +1,11 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Upload, FileUp, Loader2, CheckCircle, X, Smartphone } from "lucide-react";
+import { Upload, FileUp, Loader2, CheckCircle, X, Smartphone, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
 import Swal from "sweetalert2";
 import { extractApkIcon } from "@/lib/apk-icon-extractor";
 
@@ -17,6 +18,8 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
+  const [linkvertiseUrl1, setLinkvertiseUrl1] = useState("");
+  const [linkvertiseUrl2, setLinkvertiseUrl2] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
 
@@ -146,6 +149,16 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       return;
     }
 
+    if (!linkvertiseUrl1.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Linkvertise URL Required",
+        text: "Masukkan minimal 1 URL Linkvertise untuk monetisasi.",
+        confirmButtonColor: "hsl(145 65% 42%)",
+      });
+      return;
+    }
+
     // Extract app info from filename
     const { appName, version } = extractAppInfo(selectedFile.name);
     const description = `Android app package for ${appName}`;
@@ -230,6 +243,9 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
         console.warn("Could not extract icon:", iconError);
       }
 
+      // Prepare Linkvertise URLs
+      const linkvertiseUrls = [linkvertiseUrl1, linkvertiseUrl2].filter(url => url.trim() !== "");
+
       // Save metadata to database
       const { error: dbError } = await supabase.from("apk_uploads").insert({
         app_name: appName,
@@ -240,6 +256,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
         download_url: downloadUrl,
         file_size: selectedFile.size,
         icon_url: iconUrl,
+        linkvertise_urls: linkvertiseUrls,
       } as any);
 
       if (dbError) throw dbError;
@@ -254,6 +271,8 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
 
       // Reset form
       setSelectedFile(null);
+      setLinkvertiseUrl1("");
+      setLinkvertiseUrl2("");
       if (fileInputRef.current) fileInputRef.current.value = "";
 
       onUploadSuccess();
@@ -360,6 +379,31 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Linkvertise URLs */}
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2">
+              <Link2 className="w-4 h-4" />
+              Linkvertise URLs
+            </Label>
+            <Input
+              placeholder="Link Linkvertise #1 (wajib)"
+              value={linkvertiseUrl1}
+              onChange={(e) => setLinkvertiseUrl1(e.target.value)}
+              disabled={isUploading}
+              className="h-10"
+            />
+            <Input
+              placeholder="Link Linkvertise #2 (opsional)"
+              value={linkvertiseUrl2}
+              onChange={(e) => setLinkvertiseUrl2(e.target.value)}
+              disabled={isUploading}
+              className="h-10"
+            />
+            <p className="text-xs text-muted-foreground">
+              Masukkan minimal 1 URL Linkvertise untuk monetisasi download.
+            </p>
           </div>
 
           {isUploading && (

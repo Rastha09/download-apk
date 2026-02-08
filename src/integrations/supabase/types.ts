@@ -26,6 +26,7 @@ export type Database = {
           file_size: number | null
           icon_url: string | null
           id: string
+          linkvertise_urls: string[] | null
           version: string
         }
         Insert: {
@@ -39,6 +40,7 @@ export type Database = {
           file_size?: number | null
           icon_url?: string | null
           id?: string
+          linkvertise_urls?: string[] | null
           version: string
         }
         Update: {
@@ -52,6 +54,7 @@ export type Database = {
           file_size?: number | null
           icon_url?: string | null
           id?: string
+          linkvertise_urls?: string[] | null
           version?: string
         }
         Relationships: []
