@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import Swal from "sweetalert2";
+import { extractApkIcon } from "@/lib/apk-icon-extractor";
 
 interface ApkUploadFormProps {
   onUploadSuccess: () => void;
@@ -208,6 +209,27 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
 
       const downloadUrl = urlData.publicUrl;
 
+      // Extract icon from APK
+      let iconUrl: string | null = null;
+      try {
+        const iconBlob = await extractApkIcon(selectedFile);
+        if (iconBlob) {
+          const iconPath = `icons/${timestamp}_icon.png`;
+          const { error: iconError } = await supabase.storage
+            .from("apk-files")
+            .upload(iconPath, iconBlob, { contentType: "image/png" });
+
+          if (!iconError) {
+            const { data: iconUrlData } = supabase.storage
+              .from("apk-files")
+              .getPublicUrl(iconPath);
+            iconUrl = iconUrlData.publicUrl;
+          }
+        }
+      } catch (iconError) {
+        console.warn("Could not extract icon:", iconError);
+      }
+
       // Save metadata to database
       const { error: dbError } = await supabase.from("apk_uploads").insert({
         app_name: appName,
@@ -217,7 +239,8 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
         file_path: filePath,
         download_url: downloadUrl,
         file_size: selectedFile.size,
-      });
+        icon_url: iconUrl,
+      } as any);
 
       if (dbError) throw dbError;
 
