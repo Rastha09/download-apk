@@ -18,6 +18,7 @@ interface ApkCardProps {
   createdAt: string;
   index: number;
   downloadCount: number;
+  iconUrl?: string;
   onDelete?: () => void;
   onDownloadComplete?: () => void;
   showDelete?: boolean;
@@ -35,6 +36,7 @@ export function ApkCard({
   createdAt,
   index,
   downloadCount,
+  iconUrl,
   onDelete,
   onDownloadComplete,
   showDelete = false,
@@ -248,7 +250,19 @@ export function ApkCard({
         {/* Header */}
         <div className="flex items-start gap-4 mb-4">
           <div className="relative">
-            <div className="w-12 h-12 rounded-xl gradient-hero flex items-center justify-center flex-shrink-0 shadow-glow">
+            {iconUrl ? (
+              <img
+                src={iconUrl}
+                alt={`${appName} icon`}
+                className="w-12 h-12 rounded-xl object-cover flex-shrink-0 shadow-md"
+                onError={(e) => {
+                  // Fallback to default icon on error
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+            ) : null}
+            <div className={`w-12 h-12 rounded-xl gradient-hero flex items-center justify-center flex-shrink-0 shadow-glow ${iconUrl ? 'hidden' : ''}`}>
               <Smartphone className="w-6 h-6 text-primary-foreground" />
             </div>
             {/* File type badge */}

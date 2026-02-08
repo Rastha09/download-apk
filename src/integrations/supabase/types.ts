@@ -24,6 +24,7 @@ export type Database = {
           file_name: string
           file_path: string
           file_size: number | null
+          icon_url: string | null
           id: string
           version: string
         }
@@ -36,6 +37,7 @@ export type Database = {
           file_name: string
           file_path: string
           file_size?: number | null
+          icon_url?: string | null
           id?: string
           version: string
         }
@@ -48,6 +50,7 @@ export type Database = {
           file_name?: string
           file_path?: string
           file_size?: number | null
+          icon_url?: string | null
           id?: string
           version?: string
         }
