@@ -1,11 +1,10 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Upload, FileUp, Loader2, CheckCircle, X, Smartphone, Link2 } from "lucide-react";
+import { Upload, FileUp, Loader2, CheckCircle, X, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
 import Swal from "sweetalert2";
 import { extractApkIcon } from "@/lib/apk-icon-extractor";
 
@@ -18,8 +17,6 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
-  const [linkvertiseUrl1, setLinkvertiseUrl1] = useState("");
-  const [linkvertiseUrl2, setLinkvertiseUrl2] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
 
@@ -41,36 +38,24 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
     }
   };
 
-  // Extract app name and version from filename
   const extractAppInfo = (fileName: string) => {
-    // Remove extension
     const nameWithoutExt = fileName.replace(/\.(apk|apks)$/i, "");
-    
-    // Try to extract version from common patterns like "AppName_v1.2.3" or "AppName-1.2.3" or "AppName 1.2.3"
     const versionPatterns = [
-      /[_\-\s]v?(\d+\.\d+(?:\.\d+)?(?:\.\d+)?)/i,  // AppName_v1.2.3 or AppName-1.2.3
-      /[_\-\s](\d+\.\d+(?:\.\d+)?(?:\.\d+)?)$/i,   // AppName_1.2.3 at the end
+      /[_\-\s]v?(\d+\.\d+(?:\.\d+)?(?:\.\d+)?)/i,
+      /[_\-\s](\d+\.\d+(?:\.\d+)?(?:\.\d+)?)$/i,
     ];
-    
     let version = "1.0";
     let appName = nameWithoutExt;
-    
     for (const pattern of versionPatterns) {
       const match = nameWithoutExt.match(pattern);
       if (match) {
         version = match[1];
-        // Remove version part from app name
         appName = nameWithoutExt.replace(pattern, "").trim();
         break;
       }
     }
-    
-    // Clean up app name: replace underscores/dashes with spaces, trim
     appName = appName.replace(/[_\-]+/g, " ").trim();
-    
-    // Capitalize first letter of each word
     appName = appName.replace(/\b\w/g, (c) => c.toUpperCase());
-    
     return { appName, version };
   };
 
@@ -88,14 +73,12 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       validateAndSetFile(e.dataTransfer.files[0]);
     }
   };
 
   const validateAndSetFile = (file: File) => {
-    // Check file extension
     const fileName = file.name.toLowerCase();
     if (!fileName.endsWith(".apk") && !fileName.endsWith(".apks")) {
       Swal.fire({
@@ -106,8 +89,6 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       });
       return;
     }
-
-    // Check file size (500MB max)
     const maxSize = 500 * 1024 * 1024;
     if (file.size > maxSize) {
       Swal.fire({
@@ -118,7 +99,6 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       });
       return;
     }
-
     setSelectedFile(file);
   };
 
@@ -149,17 +129,6 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       return;
     }
 
-    if (!linkvertiseUrl1.trim()) {
-      Swal.fire({
-        icon: "warning",
-        title: "Linkvertise URL Required",
-        text: "Masukkan minimal 1 URL Linkvertise untuk monetisasi.",
-        confirmButtonColor: "hsl(145 65% 42%)",
-      });
-      return;
-    }
-
-    // Extract app info from filename
     const { appName, version } = extractAppInfo(selectedFile.name);
     const description = `Android app package for ${appName}`;
 
@@ -167,47 +136,31 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
     setUploadProgress(0);
 
     try {
-      // Generate unique file path
       const timestamp = Date.now();
       const sanitizedName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, "_");
       const filePath = `${timestamp}_${sanitizedName}`;
 
-      // Upload file to storage with progress tracking using XMLHttpRequest
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData?.session?.access_token;
-      
+
       const uploadUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/apk-files/${filePath}`;
-      
+
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhrRef.current = xhr;
-        
         xhr.upload.addEventListener("progress", (event) => {
           if (event.lengthComputable) {
             const percentComplete = Math.round((event.loaded / event.total) * 100);
             setUploadProgress(percentComplete);
           }
         });
-        
         xhr.addEventListener("load", () => {
           xhrRef.current = null;
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve();
-          } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`));
-          }
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error(`Upload failed with status ${xhr.status}`));
         });
-        
-        xhr.addEventListener("error", () => {
-          xhrRef.current = null;
-          reject(new Error("Upload failed"));
-        });
-
-        xhr.addEventListener("abort", () => {
-          xhrRef.current = null;
-          reject(new Error("Upload cancelled"));
-        });
-        
+        xhr.addEventListener("error", () => { xhrRef.current = null; reject(new Error("Upload failed")); });
+        xhr.addEventListener("abort", () => { xhrRef.current = null; reject(new Error("Upload cancelled")); });
         xhr.open("POST", uploadUrl);
         xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
         xhr.setRequestHeader("apikey", import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
@@ -215,14 +168,11 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
         xhr.send(selectedFile);
       });
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from("apk-files")
-        .getPublicUrl(filePath);
-
+      // Get storage URL (admin-only, never exposed to public)
+      const { data: urlData } = supabase.storage.from("apk-files").getPublicUrl(filePath);
       const downloadUrl = urlData.publicUrl;
 
-      // Extract icon from APK
+      // Try to extract icon, use null (placeholder) if extraction fails
       let iconUrl: string | null = null;
       try {
         const iconBlob = await extractApkIcon(selectedFile);
@@ -231,22 +181,16 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
           const { error: iconError } = await supabase.storage
             .from("apk-files")
             .upload(iconPath, iconBlob, { contentType: "image/png" });
-
           if (!iconError) {
-            const { data: iconUrlData } = supabase.storage
-              .from("apk-files")
-              .getPublicUrl(iconPath);
+            const { data: iconUrlData } = supabase.storage.from("apk-files").getPublicUrl(iconPath);
             iconUrl = iconUrlData.publicUrl;
           }
         }
       } catch (iconError) {
-        console.warn("Could not extract icon:", iconError);
+        console.warn("Could not extract icon, using placeholder:", iconError);
       }
 
-      // Prepare Linkvertise URLs
-      const linkvertiseUrls = [linkvertiseUrl1, linkvertiseUrl2].filter(url => url.trim() !== "");
-
-      // Save metadata to database
+      // Save to database WITHOUT Linkvertise URLs (admin adds later via Edit)
       const { error: dbError } = await supabase.from("apk_uploads").insert({
         app_name: appName,
         version: version,
@@ -256,31 +200,23 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
         download_url: downloadUrl,
         file_size: selectedFile.size,
         icon_url: iconUrl,
-        linkvertise_urls: linkvertiseUrls,
+        linkvertise_urls: null,
       } as any);
 
       if (dbError) throw dbError;
 
-      // Success!
       Swal.fire({
         icon: "success",
-        title: "Upload Successful!",
-        text: "Your APK has been uploaded successfully.",
+        title: "Upload Berhasil!",
+        text: "APK telah diupload. Tambahkan URL Linkvertise melalui tombol Edit.",
         confirmButtonColor: "hsl(145 65% 42%)",
       });
 
-      // Reset form
       setSelectedFile(null);
-      setLinkvertiseUrl1("");
-      setLinkvertiseUrl2("");
       if (fileInputRef.current) fileInputRef.current.value = "";
-
       onUploadSuccess();
     } catch (error: any) {
-      // Don't show error for cancelled uploads
-      if (error.message === "Upload cancelled") {
-        return;
-      }
+      if (error.message === "Upload cancelled") return;
       console.error("Upload error:", error);
       Swal.fire({
         icon: "error",
@@ -308,7 +244,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
           </div>
           <div>
             <h2 className="text-xl font-bold text-foreground">Upload APK</h2>
-            <p className="text-sm text-muted-foreground">Share your Android app with the world</p>
+            <p className="text-sm text-muted-foreground">Upload file, tambahkan Linkvertise setelahnya via Edit</p>
           </div>
         </div>
 
@@ -344,9 +280,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
                   </div>
                   <div>
                     <p className="font-medium text-foreground">{selectedFile.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatFileSize(selectedFile.size)}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{formatFileSize(selectedFile.size)}</p>
                   </div>
                   <Button
                     type="button"
@@ -369,41 +303,12 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
                     <FileUp className="w-7 h-7 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">
-                      Drag & drop your APK/APKS file here
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      or click to browse (max 500MB)
-                    </p>
+                    <p className="font-medium text-foreground">Drag & drop your APK/APKS file here</p>
+                    <p className="text-sm text-muted-foreground">or click to browse (max 500MB)</p>
                   </div>
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Linkvertise URLs */}
-          <div className="space-y-3">
-            <Label className="flex items-center gap-2">
-              <Link2 className="w-4 h-4" />
-              Linkvertise URLs
-            </Label>
-            <Input
-              placeholder="Link Linkvertise #1 (wajib)"
-              value={linkvertiseUrl1}
-              onChange={(e) => setLinkvertiseUrl1(e.target.value)}
-              disabled={isUploading}
-              className="h-10"
-            />
-            <Input
-              placeholder="Link Linkvertise #2 (opsional)"
-              value={linkvertiseUrl2}
-              onChange={(e) => setLinkvertiseUrl2(e.target.value)}
-              disabled={isUploading}
-              className="h-10"
-            />
-            <p className="text-xs text-muted-foreground">
-              Masukkan minimal 1 URL Linkvertise untuk monetisasi download.
-            </p>
           </div>
 
           {isUploading && (
