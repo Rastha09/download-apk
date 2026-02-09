@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
-import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Package, Layers, BarChart3, Clock } from "lucide-react";
+import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Package, Layers, BarChart3, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { supabase } from "@/integrations/supabase/client";
 import { DownloadModal } from "@/components/DownloadModal";
+import { ApkEditModal } from "@/components/ApkEditModal";
 import { useDownloadCooldown } from "@/hooks/useDownloadCooldown";
 
 interface ApkCardProps {
@@ -14,6 +16,7 @@ interface ApkCardProps {
   description: string;
   fileName: string;
   filePath: string;
+  downloadUrl: string;
   fileSize?: number;
   createdAt: string;
   index: number;
@@ -22,7 +25,9 @@ interface ApkCardProps {
   linkvertiseUrls?: string[];
   onDelete?: () => void;
   onDownloadComplete?: () => void;
+  onEdit?: () => void;
   showDelete?: boolean;
+  isAdmin?: boolean;
 }
 
 const ROTATION_KEY_PREFIX = "apk_link_rotation_";
@@ -34,6 +39,7 @@ export function ApkCard({
   description,
   fileName,
   filePath,
+  downloadUrl,
   fileSize,
   createdAt,
   index,
@@ -42,12 +48,18 @@ export function ApkCard({
   linkvertiseUrls = [],
   onDelete,
   onDownloadComplete,
+  onEdit,
   showDelete = false,
+  isAdmin = false,
 }: ApkCardProps) {
   const [deleting, setDeleting] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { checkCooldown, recordClick } = useDownloadCooldown();
+
+  const hasLinkvertise = linkvertiseUrls && linkvertiseUrls.length > 0 && linkvertiseUrls[0]?.trim() !== "";
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "Unknown size";
@@ -67,30 +79,19 @@ export function ApkCard({
 
   const getNextLinkvertiseUrl = (): string | null => {
     if (!linkvertiseUrls || linkvertiseUrls.length === 0) return null;
-
     const rotationKey = ROTATION_KEY_PREFIX + id;
     const lastIndex = parseInt(localStorage.getItem(rotationKey) || "-1", 10);
     const nextIndex = (lastIndex + 1) % linkvertiseUrls.length;
     localStorage.setItem(rotationKey, String(nextIndex));
-
     return linkvertiseUrls[nextIndex];
   };
 
   const handleDownloadClick = () => {
-    if (linkvertiseUrls.length === 0) {
-      Swal.fire({
-        icon: "info",
-        title: "Belum Tersedia",
-        text: "Link download untuk APK ini belum dikonfigurasi.",
-        confirmButtonColor: "hsl(145 65% 42%)",
-      });
-      return;
-    }
+    if (!hasLinkvertise) return;
     setShowModal(true);
   };
 
   const handleConfirmDownload = () => {
-    // Check cooldown
     const { allowed, remaining } = checkCooldown(id);
     if (!allowed) {
       setShowModal(false);
@@ -106,13 +107,9 @@ export function ApkCard({
       return;
     }
 
-    // Record click time
     recordClick(id);
-
-    // Show loading state
     setIsRedirecting(true);
 
-    // Get next Linkvertise URL in rotation
     const targetUrl = getNextLinkvertiseUrl();
     if (!targetUrl) {
       setIsRedirecting(false);
@@ -120,18 +117,14 @@ export function ApkCard({
       return;
     }
 
-    // Delay then open in new tab
     setTimeout(async () => {
       window.open(targetUrl, "_blank");
-
-      // Increment download count
       try {
         await supabase.rpc("increment_download_count", { apk_id: id });
         onDownloadComplete?.();
       } catch (error) {
         console.error("Error incrementing download count:", error);
       }
-
       setIsRedirecting(false);
       setShowModal(false);
     }, 1800);
@@ -155,14 +148,12 @@ export function ApkCard({
         const { error: storageError } = await supabase.storage
           .from("apk-files")
           .remove([filePath]);
-
         if (storageError) throw storageError;
 
         const { error: dbError } = await supabase
           .from("apk_uploads")
           .delete()
           .eq("id", id);
-
         if (dbError) throw dbError;
 
         Swal.fire({
@@ -172,7 +163,6 @@ export function ApkCard({
           timer: 1500,
           showConfirmButton: false,
         });
-
         onDelete?.();
       } catch (error) {
         console.error("Error deleting APK:", error);
@@ -185,6 +175,22 @@ export function ApkCard({
       } finally {
         setDeleting(false);
       }
+    }
+  };
+
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(downloadUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Menyalin",
+        text: "Tidak bisa menyalin URL.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     }
   };
 
@@ -206,23 +212,27 @@ export function ApkCard({
                   alt={`${appName} icon`}
                   className="w-12 h-12 rounded-xl object-cover flex-shrink-0 shadow-md"
                   onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling?.classList.remove("hidden");
                   }}
                 />
               ) : null}
-              <div className={`w-12 h-12 rounded-xl gradient-hero flex items-center justify-center flex-shrink-0 shadow-glow ${iconUrl ? 'hidden' : ''}`}>
+              <div
+                className={`w-12 h-12 rounded-xl gradient-hero flex items-center justify-center flex-shrink-0 shadow-glow ${
+                  iconUrl ? "hidden" : ""
+                }`}
+              >
                 <Smartphone className="w-6 h-6 text-primary-foreground" />
               </div>
               {/* File type badge */}
               <div
                 className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase flex items-center gap-0.5 ${
-                  fileName.toLowerCase().endsWith('.apks')
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-emerald-500 text-white'
+                  fileName.toLowerCase().endsWith(".apks")
+                    ? "bg-purple-500 text-white"
+                    : "bg-emerald-500 text-white"
                 }`}
               >
-                {fileName.toLowerCase().endsWith('.apks') ? (
+                {fileName.toLowerCase().endsWith(".apks") ? (
                   <>
                     <Layers className="w-2.5 h-2.5" />
                     <span>S</span>
@@ -240,16 +250,14 @@ export function ApkCard({
                 </span>
                 <span
                   className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                    fileName.toLowerCase().endsWith('.apks')
-                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                      : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                    fileName.toLowerCase().endsWith(".apks")
+                      ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                      : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
                   }`}
                 >
-                  {fileName.toLowerCase().endsWith('.apks') ? 'APKS Bundle' : 'APK'}
+                  {fileName.toLowerCase().endsWith(".apks") ? "APKS Bundle" : "APK"}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  {formatFileSize(fileSize)}
-                </span>
+                <span className="text-xs text-muted-foreground">{formatFileSize(fileSize)}</span>
               </div>
             </div>
           </div>
@@ -273,16 +281,76 @@ export function ApkCard({
             </div>
           </div>
 
+          {/* Admin: APK URL (readonly + copy) */}
+          {isAdmin && (
+            <div className="mb-4 space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                APK URL (Admin Only)
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  readOnly
+                  value={downloadUrl}
+                  className="h-9 text-xs bg-muted/50 font-mono"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleCopyUrl}
+                  className="h-9 w-9 flex-shrink-0"
+                >
+                  {copied ? (
+                    <Check className="w-4 h-4 text-primary" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Linkvertise status badge (admin only) */}
+          {isAdmin && !hasLinkvertise && (
+            <div className="mb-4 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/20">
+              <p className="text-xs text-destructive font-medium">
+                ⚠ Linkvertise belum dikonfigurasi. Tombol download nonaktif untuk user publik.
+              </p>
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex gap-2">
-            <Button
-              onClick={handleDownloadClick}
-              disabled={deleting}
-              className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity"
-            >
-              <Download className="w-5 h-5 mr-2" />
-              Download
-            </Button>
+            {/* Download button: disabled/hidden if no Linkvertise for public users */}
+            {isAdmin ? (
+              <>
+                <Button
+                  onClick={handleDownloadClick}
+                  disabled={deleting || !hasLinkvertise}
+                  className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity disabled:opacity-40"
+                >
+                  <Download className="w-5 h-5 mr-2" />
+                  {hasLinkvertise ? "Download" : "Download (Nonaktif)"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowEditModal(true)}
+                  disabled={deleting}
+                  className="h-11 px-3"
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+              </>
+            ) : hasLinkvertise ? (
+              <Button
+                onClick={handleDownloadClick}
+                disabled={deleting}
+                className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity"
+              >
+                <Download className="w-5 h-5 mr-2" />
+                Download
+              </Button>
+            ) : null}
+
             {showDelete && (
               <Button
                 onClick={handleDelete}
@@ -306,6 +374,17 @@ export function ApkCard({
         onCancel={() => {
           if (!isRedirecting) setShowModal(false);
         }}
+      />
+
+      {/* Edit Modal (Admin) */}
+      <ApkEditModal
+        isOpen={showEditModal}
+        apkId={id}
+        appName={appName}
+        currentIconUrl={iconUrl}
+        currentLinkvertiseUrls={linkvertiseUrls}
+        onClose={() => setShowEditModal(false)}
+        onSave={() => onEdit?.()}
       />
     </>
   );

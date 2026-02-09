@@ -148,6 +148,7 @@ export function ApkList({ refreshTrigger, isAdmin = false }: ApkListProps) {
               description={apk.description}
               fileName={apk.file_name}
               filePath={apk.file_path}
+              downloadUrl={apk.download_url}
               fileSize={apk.file_size ?? undefined}
               downloadCount={apk.download_count}
               iconUrl={apk.icon_url ?? undefined}
@@ -156,7 +157,9 @@ export function ApkList({ refreshTrigger, isAdmin = false }: ApkListProps) {
               index={index}
               onDelete={fetchApks}
               onDownloadComplete={fetchApks}
+              onEdit={fetchApks}
               showDelete={isAdmin}
+              isAdmin={isAdmin}
             />
           ))}
         </div>
