@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      apk_redirects: {
+        Row: {
+          apk_id: string
+          created_at: string
+          id: string
+          slug: string
+        }
+        Insert: {
+          apk_id: string
+          created_at?: string
+          id?: string
+          slug: string
+        }
+        Update: {
+          apk_id?: string
+          created_at?: string
+          id?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apk_redirects_apk_id_fkey"
+            columns: ["apk_id"]
+            isOneToOne: false
+            referencedRelation: "apk_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apk_uploads: {
         Row: {
           app_name: string
