@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Package, Layers, BarChart3, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { supabase } from "@/integrations/supabase/client";
 import { DownloadModal } from "@/components/DownloadModal";
@@ -57,7 +57,22 @@ export function ApkCard({
   const [showEditModal, setShowEditModal] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedRedirect, setCopiedRedirect] = useState<string | null>(null);
+  const [redirectSlugs, setRedirectSlugs] = useState<string[]>([]);
   const { checkCooldown, recordClick } = useDownloadCooldown();
+
+  useEffect(() => {
+    if (isAdmin) {
+      supabase
+        .from("apk_redirects")
+        .select("slug")
+        .eq("apk_id", id)
+        .order("created_at", { ascending: true })
+        .then(({ data }) => {
+          setRedirectSlugs((data || []).map((d: any) => d.slug));
+        });
+    }
+  }, [id, isAdmin]);
 
   const hasLinkvertise = linkvertiseUrls && linkvertiseUrls.length > 0 && linkvertiseUrls[0]?.trim() !== "";
 
@@ -309,6 +324,41 @@ export function ApkCard({
             </div>
           )}
 
+          {/* Redirect Links (Admin Only) */}
+          {isAdmin && (
+            <div className="mb-4 space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                Redirect Links (Admin Only)
+              </label>
+              {redirectSlugs.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic">Belum ada redirect link</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {redirectSlugs.map((slug) => {
+                    const url = `${window.location.origin}/go/${slug}`;
+                    return (
+                      <div key={slug} className="flex gap-2">
+                        <Input readOnly value={url} className="h-9 text-xs bg-muted/50 font-mono" />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={async () => {
+                            await navigator.clipboard.writeText(url);
+                            setCopiedRedirect(slug);
+                            setTimeout(() => setCopiedRedirect(null), 2000);
+                          }}
+                          className="h-9 w-9 flex-shrink-0"
+                        >
+                          {copiedRedirect === slug ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Linkvertise status badge (admin only) */}
           {isAdmin && !hasLinkvertise && (
             <div className="mb-4 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/20">
@@ -381,10 +431,22 @@ export function ApkCard({
         isOpen={showEditModal}
         apkId={id}
         appName={appName}
+        currentDescription={description}
         currentIconUrl={iconUrl}
         currentLinkvertiseUrls={linkvertiseUrls}
         onClose={() => setShowEditModal(false)}
-        onSave={() => onEdit?.()}
+        onSave={() => {
+          onEdit?.();
+          // Refresh redirect slugs
+          supabase
+            .from("apk_redirects")
+            .select("slug")
+            .eq("apk_id", id)
+            .order("created_at", { ascending: true })
+            .then(({ data }) => {
+              setRedirectSlugs((data || []).map((d: any) => d.slug));
+            });
+        }}
       />
     </>
   );
