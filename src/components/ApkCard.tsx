@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Package, Layers, BarChart3, Pencil } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -30,7 +31,7 @@ interface ApkCardProps {
   isAdmin?: boolean;
 }
 
-const ROTATION_KEY_PREFIX = "apk_link_rotation_";
+
 
 export function ApkCard({
   id,
@@ -60,21 +61,22 @@ export function ApkCard({
   const [copiedRedirect, setCopiedRedirect] = useState<string | null>(null);
   const [redirectSlugs, setRedirectSlugs] = useState<string[]>([]);
   const { checkCooldown, recordClick } = useDownloadCooldown();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAdmin) {
-      supabase
-        .from("apk_redirects")
-        .select("slug")
-        .eq("apk_id", id)
-        .order("created_at", { ascending: true })
-        .then(({ data }) => {
-          setRedirectSlugs((data || []).map((d: any) => d.slug));
-        });
-    }
-  }, [id, isAdmin]);
+    supabase
+      .from("apk_redirects")
+      .select("slug")
+      .eq("apk_id", id)
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        setRedirectSlugs((data || []).map((d: any) => d.slug));
+      });
+  }, [id]);
 
   const hasLinkvertise = linkvertiseUrls && linkvertiseUrls.length > 0 && linkvertiseUrls[0]?.trim() !== "";
+  const hasRedirectSlugs = redirectSlugs.length > 0;
+  const canDownload = hasRedirectSlugs;
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "Unknown size";
@@ -92,17 +94,9 @@ export function ApkCard({
     });
   };
 
-  const getNextLinkvertiseUrl = (): string | null => {
-    if (!linkvertiseUrls || linkvertiseUrls.length === 0) return null;
-    const rotationKey = ROTATION_KEY_PREFIX + id;
-    const lastIndex = parseInt(localStorage.getItem(rotationKey) || "-1", 10);
-    const nextIndex = (lastIndex + 1) % linkvertiseUrls.length;
-    localStorage.setItem(rotationKey, String(nextIndex));
-    return linkvertiseUrls[nextIndex];
-  };
 
   const handleDownloadClick = () => {
-    if (!hasLinkvertise) return;
+    if (!canDownload) return;
     setShowModal(true);
   };
 
@@ -125,24 +119,11 @@ export function ApkCard({
     recordClick(id);
     setIsRedirecting(true);
 
-    const targetUrl = getNextLinkvertiseUrl();
-    if (!targetUrl) {
+    setTimeout(() => {
       setIsRedirecting(false);
       setShowModal(false);
-      return;
-    }
-
-    setTimeout(async () => {
-      window.open(targetUrl, "_blank");
-      try {
-        await supabase.rpc("increment_download_count", { apk_id: id });
-        onDownloadComplete?.();
-      } catch (error) {
-        console.error("Error incrementing download count:", error);
-      }
-      setIsRedirecting(false);
-      setShowModal(false);
-    }, 1800);
+      navigate(`/safelink/${id}`);
+    }, 1200);
   };
 
   const handleDelete = async () => {
@@ -359,27 +340,27 @@ export function ApkCard({
             </div>
           )}
 
-          {/* Linkvertise status badge (admin only) */}
-          {isAdmin && !hasLinkvertise && (
+          {/* Download status badge (admin only) */}
+          {isAdmin && !canDownload && (
             <div className="mb-4 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/20">
               <p className="text-xs text-destructive font-medium">
-                ⚠ Linkvertise belum dikonfigurasi. Tombol download nonaktif untuk user publik.
+                ⚠ Belum ada redirect slug. Tombol download nonaktif untuk user publik.
               </p>
             </div>
           )}
 
           {/* Action Buttons */}
           <div className="flex gap-2">
-            {/* Download button: disabled/hidden if no Linkvertise for public users */}
+            {/* Download button: disabled/hidden if no redirect slugs for public users */}
             {isAdmin ? (
               <>
                 <Button
                   onClick={handleDownloadClick}
-                  disabled={deleting || !hasLinkvertise}
+                  disabled={deleting || !canDownload}
                   className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity disabled:opacity-40"
                 >
                   <Download className="w-5 h-5 mr-2" />
-                  {hasLinkvertise ? "Download" : "Download (Nonaktif)"}
+                  {canDownload ? "Download" : "Download (Nonaktif)"}
                 </Button>
                 <Button
                   variant="outline"
@@ -390,7 +371,7 @@ export function ApkCard({
                   <Pencil className="w-4 h-4" />
                 </Button>
               </>
-            ) : hasLinkvertise ? (
+            ) : canDownload ? (
               <Button
                 onClick={handleDownloadClick}
                 disabled={deleting}
