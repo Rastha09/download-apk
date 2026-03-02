@@ -59,36 +59,33 @@ Deno.serve(async (req) => {
       });
     }
 
-    const apiUrl = `https://safelinku.com/api?api=${encodeURIComponent(apiToken)}&url=${encodeURIComponent(apk.download_url)}`;
+    const safelinkRes = await fetch("https://safelinku.com/api/v1/links", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url: apk.download_url }),
+    });
 
-    const safelinkRes = await fetch(apiUrl);
     const responseText = await safelinkRes.text();
-    
-    console.log("Safelinku API response:", responseText);
+    console.log("Safelinku API status:", safelinkRes.status, "response:", responseText.substring(0, 500));
 
-    // Try parsing as JSON first, otherwise treat the response text as the shortlink
+    if (!safelinkRes.ok) {
+      return new Response(
+        JSON.stringify({ error: "Safelinku API error", detail: responseText.substring(0, 200) }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     let shortlink: string;
     try {
       const safelinkData = JSON.parse(responseText);
-      if (safelinkData.status === "error") {
-        return new Response(
-          JSON.stringify({ error: "Failed to generate safelink", detail: safelinkData.message || "Unknown error" }),
-          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      shortlink = safelinkData.shortenedUrl || safelinkData.shortened || safelinkData.short || safelinkData.link || safelinkData.url || "";
+      // Try common response field names
+      shortlink = safelinkData.shortenedUrl || safelinkData.shortened || safelinkData.short || safelinkData.link || safelinkData.url || safelinkData.data?.link || safelinkData.data?.url || safelinkData.data?.shortenedUrl || "";
     } catch {
-      // Some APIs return the shortened URL as plain text
       const urlMatch = responseText.match(/https?:\/\/[^\s<"']+/);
-      if (urlMatch) {
-        shortlink = urlMatch[0];
-      } else {
-        console.error("Unexpected Safelinku response:", responseText.substring(0, 500));
-        return new Response(
-          JSON.stringify({ error: "Unexpected response from Safelinku API" }),
-          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      shortlink = urlMatch ? urlMatch[0] : "";
     }
 
     if (!shortlink) {
