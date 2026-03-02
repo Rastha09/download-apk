@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Loader2, ImagePlus, Save, Trash2, Plus, Link2, FileText } from "lucide-react";
+import { X, Loader2, ImagePlus, Save, Trash2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +13,6 @@ interface ApkEditModalProps {
   appName: string;
   currentDescription?: string;
   currentIconUrl?: string;
-  currentLinkvertiseUrls?: string[];
   onClose: () => void;
   onSave: () => void;
 }
@@ -25,7 +23,6 @@ export function ApkEditModal({
   appName,
   currentDescription = "",
   currentIconUrl,
-  currentLinkvertiseUrls = [],
   onClose,
   onSave,
 }: ApkEditModalProps) {
@@ -33,63 +30,15 @@ export function ApkEditModal({
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconPreview, setIconPreview] = useState<string | null>(currentIconUrl || null);
   const [isSaving, setIsSaving] = useState(false);
-  const [slugs, setSlugs] = useState<{ id: string; slug: string }[]>([]);
-  const [newSlug, setNewSlug] = useState("");
-  const [loadingSlugs, setLoadingSlugs] = useState(false);
-  const [linkvertiseUrl1, setLinkvertiseUrl1] = useState(currentLinkvertiseUrls[0] || "");
-  const [linkvertiseUrl2, setLinkvertiseUrl2] = useState(currentLinkvertiseUrls[1] || "");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setDescription(currentDescription);
       setIconPreview(currentIconUrl || null);
-      setLinkvertiseUrl1(currentLinkvertiseUrls[0] || "");
-      setLinkvertiseUrl2(currentLinkvertiseUrls[1] || "");
       setIconFile(null);
-      fetchSlugs();
     }
   }, [isOpen]);
-
-  const fetchSlugs = async () => {
-    setLoadingSlugs(true);
-    const { data } = await supabase
-      .from("apk_redirects")
-      .select("id, slug")
-      .eq("apk_id", apkId)
-      .order("created_at", { ascending: true });
-    setSlugs(data || []);
-    setLoadingSlugs(false);
-  };
-
-  const handleAddSlug = async () => {
-    const trimmed = newSlug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
-    if (!trimmed) return;
-
-    const { data, error } = await supabase
-      .from("apk_redirects")
-      .insert({ apk_id: apkId, slug: trimmed })
-      .select("id, slug")
-      .single();
-
-    if (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Gagal",
-        text: error.message.includes("duplicate") ? "Slug sudah digunakan." : error.message,
-        confirmButtonColor: "hsl(145 65% 42%)",
-      });
-      return;
-    }
-
-    setSlugs((prev) => [...prev, data]);
-    setNewSlug("");
-  };
-
-  const handleDeleteSlug = async (slugId: string) => {
-    await supabase.from("apk_redirects").delete().eq("id", slugId);
-    setSlugs((prev) => prev.filter((s) => s.id !== slugId));
-  };
 
   const handleIconSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -129,10 +78,6 @@ export function ApkEditModal({
         updateData.icon_url = iconUrlData.publicUrl;
       }
 
-      // Save linkvertise URLs
-      const linkvertiseUrls = [linkvertiseUrl1.trim(), linkvertiseUrl2.trim()].filter(u => u !== "");
-      updateData.linkvertise_urls = linkvertiseUrls.length > 0 ? linkvertiseUrls : null;
-
       const { error: dbError } = await supabase.from("apk_uploads").update(updateData).eq("id", apkId);
       if (dbError) throw dbError;
 
@@ -145,8 +90,6 @@ export function ApkEditModal({
       setIsSaving(false);
     }
   };
-
-  const domain = window.location.origin;
 
   return (
     <AnimatePresence>
@@ -223,56 +166,6 @@ export function ApkEditModal({
                     disabled={isSaving}
                     className="min-h-[80px] resize-none"
                   />
-                </div>
-
-                {/* Redirect Slug Management */}
-                <div className="space-y-3">
-                  <Label className="flex items-center gap-2">
-                    <Link2 className="w-4 h-4" />
-                    Redirect Slugs
-                  </Label>
-                  {loadingSlugs ? (
-                    <p className="text-xs text-muted-foreground">Memuat...</p>
-                  ) : slugs.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic">Belum ada redirect slug</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {slugs.map((s) => (
-                        <div key={s.id} className="flex items-center gap-2">
-                          <Input readOnly value={`${domain}/go/${s.slug}`} className="h-9 text-xs bg-muted/50 font-mono flex-1" />
-                          <Button variant="outline" size="icon" onClick={() => handleDeleteSlug(s.id)} className="h-9 w-9 flex-shrink-0 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="slug-baru (huruf kecil, angka, strip)"
-                      value={newSlug}
-                      onChange={(e) => setNewSlug(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleAddSlug()}
-                      disabled={isSaving}
-                      className="h-9 text-sm flex-1"
-                    />
-                    <Button variant="outline" size="icon" onClick={handleAddSlug} disabled={!newSlug.trim() || isSaving} className="h-9 w-9 flex-shrink-0">
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Linkvertise URLs */}
-                <div className="space-y-3">
-                  <Label className="flex items-center gap-2">
-                    <Link2 className="w-4 h-4" />
-                    Linkvertise URLs
-                  </Label>
-                  <div className="space-y-2">
-                    <Input placeholder="Link Linkvertise #1" value={linkvertiseUrl1} onChange={(e) => setLinkvertiseUrl1(e.target.value)} disabled={isSaving} className="h-10" />
-                    <Input placeholder="Link Linkvertise #2 (opsional)" value={linkvertiseUrl2} onChange={(e) => setLinkvertiseUrl2(e.target.value)} disabled={isSaving} className="h-10" />
-                  </div>
-                  <p className="text-xs text-muted-foreground">Isi minimal 1 agar tombol download aktif untuk publik.</p>
                 </div>
 
                 {/* Action Buttons */}

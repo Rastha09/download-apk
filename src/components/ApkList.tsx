@@ -17,7 +17,7 @@ interface ApkUpload {
   file_size: number | null;
   download_count: number;
   icon_url: string | null;
-  linkvertise_urls: string[] | null;
+  
   created_at: string;
 }
 
@@ -152,7 +152,7 @@ export function ApkList({ refreshTrigger, isAdmin = false }: ApkListProps) {
               fileSize={apk.file_size ?? undefined}
               downloadCount={apk.download_count}
               iconUrl={apk.icon_url ?? undefined}
-              linkvertiseUrls={apk.linkvertise_urls ?? undefined}
+              
               createdAt={apk.created_at}
               index={index}
               onDelete={fetchApks}
