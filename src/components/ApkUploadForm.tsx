@@ -190,7 +190,6 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
         console.warn("Could not extract icon, using placeholder:", iconError);
       }
 
-      // Save to database WITHOUT Linkvertise URLs (admin adds later via Edit)
       const { error: dbError } = await supabase.from("apk_uploads").insert({
         app_name: appName,
         version: version,
@@ -200,7 +199,6 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
         download_url: downloadUrl,
         file_size: selectedFile.size,
         icon_url: iconUrl,
-        linkvertise_urls: null,
       } as any);
 
       if (dbError) throw dbError;
@@ -208,7 +206,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       Swal.fire({
         icon: "success",
         title: "Upload Berhasil!",
-        text: "APK telah diupload. Tambahkan URL Linkvertise melalui tombol Edit.",
+        text: "APK telah diupload dan siap didownload melalui Safelinku.",
         confirmButtonColor: "hsl(145 65% 42%)",
       });
 
@@ -244,7 +242,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
           </div>
           <div>
             <h2 className="text-xl font-bold text-foreground">Upload APK</h2>
-            <p className="text-sm text-muted-foreground">Upload file, tambahkan Linkvertise setelahnya via Edit</p>
+            <p className="text-sm text-muted-foreground">Upload file APK/APKS untuk dibagikan</p>
           </div>
         </div>
 

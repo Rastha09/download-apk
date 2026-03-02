@@ -1,9 +1,8 @@
 import { motion } from "framer-motion";
 import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Package, Layers, BarChart3, Pencil } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Swal from "sweetalert2";
 import { supabase } from "@/integrations/supabase/client";
 import { DownloadModal } from "@/components/DownloadModal";
@@ -23,15 +22,12 @@ interface ApkCardProps {
   index: number;
   downloadCount: number;
   iconUrl?: string;
-  linkvertiseUrls?: string[];
   onDelete?: () => void;
   onDownloadComplete?: () => void;
   onEdit?: () => void;
   showDelete?: boolean;
   isAdmin?: boolean;
 }
-
-
 
 export function ApkCard({
   id,
@@ -46,7 +42,6 @@ export function ApkCard({
   index,
   downloadCount,
   iconUrl,
-  linkvertiseUrls = [],
   onDelete,
   onDownloadComplete,
   onEdit,
@@ -58,25 +53,7 @@ export function ApkCard({
   const [showEditModal, setShowEditModal] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [copiedRedirect, setCopiedRedirect] = useState<string | null>(null);
-  const [redirectSlugs, setRedirectSlugs] = useState<string[]>([]);
   const { checkCooldown, recordClick } = useDownloadCooldown();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    supabase
-      .from("apk_redirects")
-      .select("slug")
-      .eq("apk_id", id)
-      .order("created_at", { ascending: true })
-      .then(({ data }) => {
-        setRedirectSlugs((data || []).map((d: any) => d.slug));
-      });
-  }, [id]);
-
-  const hasLinkvertise = linkvertiseUrls && linkvertiseUrls.length > 0 && linkvertiseUrls[0]?.trim() !== "";
-  const hasRedirectSlugs = redirectSlugs.length > 0;
-  const canDownload = hasRedirectSlugs;
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "Unknown size";
@@ -94,9 +71,7 @@ export function ApkCard({
     });
   };
 
-
   const handleDownloadClick = () => {
-    if (!canDownload) return;
     setShowModal(true);
   };
 
@@ -128,7 +103,6 @@ export function ApkCard({
         throw new Error(data?.error || "Gagal generate link");
       }
 
-      // Redirect to safelinku shortlink
       window.location.href = data.shortlink;
     } catch (err: any) {
       console.error("Safelink generation error:", err);
@@ -237,7 +211,6 @@ export function ApkCard({
               >
                 <Smartphone className="w-6 h-6 text-primary-foreground" />
               </div>
-              {/* File type badge */}
               <div
                 className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase flex items-center gap-0.5 ${
                   fileName.toLowerCase().endsWith(".apks")
@@ -322,62 +295,17 @@ export function ApkCard({
             </div>
           )}
 
-          {/* Redirect Links (Admin Only) */}
-          {isAdmin && (
-            <div className="mb-4 space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
-                Redirect Links (Admin Only)
-              </label>
-              {redirectSlugs.length === 0 ? (
-                <p className="text-xs text-muted-foreground italic">Belum ada redirect link</p>
-              ) : (
-                <div className="space-y-1.5">
-                  {redirectSlugs.map((slug) => {
-                    const url = `${window.location.origin}/go/${slug}`;
-                    return (
-                      <div key={slug} className="flex gap-2">
-                        <Input readOnly value={url} className="h-9 text-xs bg-muted/50 font-mono" />
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={async () => {
-                            await navigator.clipboard.writeText(url);
-                            setCopiedRedirect(slug);
-                            setTimeout(() => setCopiedRedirect(null), 2000);
-                          }}
-                          className="h-9 w-9 flex-shrink-0"
-                        >
-                          {copiedRedirect === slug ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Download status badge (admin only) */}
-          {isAdmin && !canDownload && (
-            <div className="mb-4 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/20">
-              <p className="text-xs text-destructive font-medium">
-                ⚠ Belum ada redirect slug. Tombol download nonaktif untuk user publik.
-              </p>
-            </div>
-          )}
-
           {/* Action Buttons */}
           <div className="flex gap-2">
-            {/* Download button: disabled/hidden if no redirect slugs for public users */}
             {isAdmin ? (
               <>
                 <Button
                   onClick={handleDownloadClick}
-                  disabled={deleting || !canDownload}
-                  className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity disabled:opacity-40"
+                  disabled={deleting}
+                  className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity"
                 >
                   <Download className="w-5 h-5 mr-2" />
-                  {canDownload ? "Download" : "Download (Nonaktif)"}
+                  Download
                 </Button>
                 <Button
                   variant="outline"
@@ -388,7 +316,7 @@ export function ApkCard({
                   <Pencil className="w-4 h-4" />
                 </Button>
               </>
-            ) : canDownload ? (
+            ) : (
               <Button
                 onClick={handleDownloadClick}
                 disabled={deleting}
@@ -397,7 +325,7 @@ export function ApkCard({
                 <Download className="w-5 h-5 mr-2" />
                 Download
               </Button>
-            ) : null}
+            )}
 
             {showDelete && (
               <Button
@@ -431,19 +359,9 @@ export function ApkCard({
         appName={appName}
         currentDescription={description}
         currentIconUrl={iconUrl}
-        currentLinkvertiseUrls={linkvertiseUrls}
         onClose={() => setShowEditModal(false)}
         onSave={() => {
           onEdit?.();
-          // Refresh redirect slugs
-          supabase
-            .from("apk_redirects")
-            .select("slug")
-            .eq("apk_id", id)
-            .order("created_at", { ascending: true })
-            .then(({ data }) => {
-              setRedirectSlugs((data || []).map((d: any) => d.slug));
-            });
         }}
       />
     </>
