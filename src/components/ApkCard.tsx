@@ -100,7 +100,7 @@ export function ApkCard({
     setShowModal(true);
   };
 
-  const handleConfirmDownload = () => {
+  const handleConfirmDownload = async () => {
     const { allowed, remaining } = checkCooldown(id);
     if (!allowed) {
       setShowModal(false);
@@ -119,11 +119,28 @@ export function ApkCard({
     recordClick(id);
     setIsRedirecting(true);
 
-    setTimeout(() => {
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("generate-safelink", {
+        body: { apkId: id },
+      });
+
+      if (fnError || !data?.shortlink) {
+        throw new Error(data?.error || "Gagal generate link");
+      }
+
+      // Redirect to safelinku shortlink
+      window.location.href = data.shortlink;
+    } catch (err: any) {
+      console.error("Safelink generation error:", err);
       setIsRedirecting(false);
       setShowModal(false);
-      navigate(`/safelink/${id}`);
-    }, 1200);
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: err.message || "Terjadi kesalahan saat menyiapkan link download.",
+        confirmButtonColor: "hsl(145 65% 42%)",
+      });
+    }
   };
 
   const handleDelete = async () => {
