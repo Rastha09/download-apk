@@ -1,1 +1,4 @@
 project_id = "facpkeflplpalbgzgmhn"
+
+[functions.generate-safelink]
+verify_jwt = false
