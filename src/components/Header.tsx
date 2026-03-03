@@ -24,11 +24,11 @@ export function Header() {
           </div>
 
           <h1 className="text-3xl md:text-4xl font-bold text-foreground uppercase tracking-[0.15em]">
-            APK Uploader
+            Downloader APK
           </h1>
 
           <p className="text-sm md:text-base font-mono text-muted-foreground tracking-[0.3em] uppercase">
-            Upload · Bagikan · Deploy
+            Upload · Download · Share
           </p>
         </div>
       </div>
