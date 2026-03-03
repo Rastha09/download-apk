@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Rajdhani', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
@@ -55,6 +55,7 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        drawer: "hsl(var(--drawer))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -73,6 +74,7 @@ export default {
       },
       boxShadow: {
         'glow': 'var(--shadow-glow)',
+        'glow-cyan': 'var(--shadow-glow-cyan)',
       },
       keyframes: {
         "accordion-down": {

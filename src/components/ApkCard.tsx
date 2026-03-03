@@ -187,17 +187,17 @@ export function ApkCard({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.1 }}
-        className="group bg-card/40 backdrop-blur-sm rounded-2xl border border-border/30 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
+        className="group bg-card border border-border rounded hover:border-primary/50 hover:shadow-glow hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
       >
-        <div className="p-5 md:p-6">
+        <div className="p-4 md:p-5">
           {/* Header */}
-          <div className="flex items-start gap-4 mb-4">
-            <div className="relative">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="relative flex-shrink-0">
               {iconUrl ? (
                 <img
                   src={iconUrl}
                   alt={`${appName} icon`}
-                  className="w-12 h-12 rounded-xl object-cover flex-shrink-0 shadow-md"
+                  className="w-11 h-11 rounded object-cover"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                     e.currentTarget.nextElementSibling?.classList.remove("hidden");
@@ -205,90 +205,70 @@ export function ApkCard({
                 />
               ) : null}
               <div
-                className={`w-12 h-12 rounded-xl gradient-hero flex items-center justify-center flex-shrink-0 shadow-glow ${
+                className={`w-11 h-11 rounded bg-secondary flex items-center justify-center ${
                   iconUrl ? "hidden" : ""
                 }`}
               >
-                <Smartphone className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <div
-                className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase flex items-center gap-0.5 ${
-                  fileName.toLowerCase().endsWith(".apks")
-                    ? "bg-purple-500 text-white"
-                    : "bg-emerald-500 text-white"
-                }`}
-              >
-                {fileName.toLowerCase().endsWith(".apks") ? (
-                  <>
-                    <Layers className="w-2.5 h-2.5" />
-                    <span>S</span>
-                  </>
-                ) : (
-                  <Package className="w-2.5 h-2.5" />
-                )}
+                <Smartphone className="w-5 h-5 text-accent" />
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-bold text-foreground truncate">{appName}</h3>
+              <h3 className="text-base font-bold text-foreground truncate uppercase tracking-wide">{appName}</h3>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                <span className="inline-flex items-center px-2 py-0.5 rounded border border-accent/40 text-[10px] font-bold font-mono text-accent uppercase">
                   v{version}
                 </span>
                 <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                  className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase ${
                     fileName.toLowerCase().endsWith(".apks")
-                      ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                      : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                      ? "bg-accent/20 text-accent"
+                      : "bg-primary/20 text-primary"
                   }`}
                 >
-                  {fileName.toLowerCase().endsWith(".apks") ? "APKS Bundle" : "APK"}
+                  {fileName.toLowerCase().endsWith(".apks") ? "APKS" : "APK"}
                 </span>
-                <span className="text-xs text-muted-foreground">{formatFileSize(fileSize)}</span>
+                <span className="text-[10px] text-muted-foreground font-mono">{formatFileSize(fileSize)}</span>
               </div>
             </div>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{description}</p>
+          <p className="text-xs text-muted-foreground mb-3 line-clamp-2 font-mono">{description}</p>
 
           {/* Meta */}
-          <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4 flex-wrap">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-3 text-[10px] text-muted-foreground mb-4 flex-wrap font-mono">
+            <div className="flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
               <span>{formatDate(createdAt)}</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <HardDrive className="w-3.5 h-3.5" />
-              <span className="truncate max-w-[150px]">{fileName}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <BarChart3 className="w-3.5 h-3.5" />
-              <span>{downloadCount.toLocaleString("id-ID")} download</span>
+            <div className="flex items-center gap-1">
+              <BarChart3 className="w-3 h-3" />
+              <span>{downloadCount.toLocaleString("id-ID")} ⬇</span>
             </div>
           </div>
 
           {/* Admin: APK URL (readonly + copy) */}
           {isAdmin && (
-            <div className="mb-4 space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
-                APK URL (Admin Only)
+            <div className="mb-3 space-y-1">
+              <label className="text-[10px] font-bold text-muted-foreground font-mono uppercase tracking-wider">
+                APK URL
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5">
                 <Input
                   readOnly
                   value={downloadUrl}
-                  className="h-9 text-xs bg-muted/50 font-mono"
+                  className="h-8 text-[10px] bg-secondary font-mono rounded border-border"
                 />
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={handleCopyUrl}
-                  className="h-9 w-9 flex-shrink-0"
+                  className="h-8 w-8 flex-shrink-0 rounded"
                 >
                   {copied ? (
-                    <Check className="w-4 h-4 text-primary" />
+                    <Check className="w-3.5 h-3.5 text-primary" />
                   ) : (
-                    <Copy className="w-4 h-4" />
+                    <Copy className="w-3.5 h-3.5" />
                   )}
                 </Button>
               </div>
@@ -297,44 +277,32 @@ export function ApkCard({
 
           {/* Action Buttons */}
           <div className="flex gap-2">
-            {isAdmin ? (
-              <>
-                <Button
-                  onClick={handleDownloadClick}
-                  disabled={deleting}
-                  className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity"
-                >
-                  <Download className="w-5 h-5 mr-2" />
-                  Download
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowEditModal(true)}
-                  disabled={deleting}
-                  className="h-11 px-3"
-                >
-                  <Pencil className="w-4 h-4" />
-                </Button>
-              </>
-            ) : (
+            <Button
+              onClick={handleDownloadClick}
+              disabled={deleting}
+              className="flex-1 h-10 font-bold text-sm uppercase tracking-wider bg-primary text-primary-foreground hover:glow-pulse rounded transition-all duration-200"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+            {isAdmin && (
               <Button
-                onClick={handleDownloadClick}
+                variant="outline"
+                onClick={() => setShowEditModal(true)}
                 disabled={deleting}
-                className="flex-1 h-11 font-semibold gradient-success hover:opacity-90 transition-opacity"
+                className="h-10 px-3 rounded"
               >
-                <Download className="w-5 h-5 mr-2" />
-                Download
+                <Pencil className="w-4 h-4" />
               </Button>
             )}
-
             {showDelete && (
               <Button
                 onClick={handleDelete}
                 disabled={deleting}
                 variant="outline"
-                className="h-11 px-3 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                className="h-10 px-3 rounded border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
               >
-                <Trash2 className={`w-5 h-5 ${deleting ? "animate-pulse" : ""}`} />
+                <Trash2 className={`w-4 h-4 ${deleting ? "animate-pulse" : ""}`} />
               </Button>
             )}
           </div>
