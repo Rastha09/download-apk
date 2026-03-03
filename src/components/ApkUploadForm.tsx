@@ -130,7 +130,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
     }
 
     const { appName, version } = extractAppInfo(selectedFile.name);
-    const description = `Android app package for ${appName}`;
+    const description = `${appName}`;
 
     setIsUploading(true);
     setUploadProgress(0);
