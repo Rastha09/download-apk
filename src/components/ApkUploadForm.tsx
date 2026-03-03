@@ -235,14 +235,14 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       transition={{ duration: 0.5 }}
       className="w-full max-w-2xl mx-auto"
     >
-      <div className="bg-card/40 backdrop-blur-sm rounded-2xl shadow-lg border border-border/30 p-6 md:p-8">
+      <div className="bg-card border border-border rounded p-5 md:p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl gradient-hero flex items-center justify-center">
-            <Smartphone className="w-6 h-6 text-primary-foreground" />
+          <div className="w-10 h-10 rounded bg-secondary flex items-center justify-center">
+            <Smartphone className="w-5 h-5 text-accent" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground">Upload APK</h2>
-            <p className="text-sm text-muted-foreground">Upload file APK/APKS untuk dibagikan</p>
+              <h2 className="text-lg font-bold text-foreground uppercase tracking-wider">Upload APK</h2>
+              <p className="text-xs text-muted-foreground font-mono">Upload file APK/APKS</p>
           </div>
         </div>
 
@@ -250,7 +250,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
           <div className="space-y-2">
             <Label>APK/APKS File</Label>
             <div
-              className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
+              className={`relative border-2 border-dashed rounded p-6 text-center transition-all duration-200 ${
                 dragActive
                   ? "border-primary bg-primary/5"
                   : selectedFile

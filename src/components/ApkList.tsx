@@ -67,78 +67,77 @@ export function ApkList({ refreshTrigger, isAdmin = false }: ApkListProps) {
       className="w-full"
     >
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
-            <Package className="w-5 h-5 text-secondary-foreground" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-foreground">Uploaded APKs</h2>
-            <p className="text-sm text-muted-foreground">
-              {apks.length} {apks.length === 1 ? "app" : "apps"} available
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search apps..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-10"
-            />
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Package className="w-5 h-5 text-accent" />
+            <h2 className="text-lg font-bold text-foreground uppercase tracking-wider">
+              Uploaded APKs
+            </h2>
+            <span className="text-xs font-mono text-muted-foreground">
+              [{apks.length}]
+            </span>
           </div>
           <Button
             variant="outline"
             size="icon"
             onClick={fetchApks}
             disabled={loading}
-            className="h-10 w-10"
+            className="h-9 w-9 rounded"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </Button>
+        </div>
+
+        {/* Search bar */}
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="> cari aplikasi..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 h-10 bg-secondary border-border font-mono text-sm rounded focus-visible:ring-primary"
+          />
         </div>
       </div>
 
       {/* Content */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
-              className="bg-card rounded-2xl border border-border p-6 animate-pulse"
+              className="bg-card rounded border border-border p-5 animate-pulse"
             >
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-muted" />
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-11 h-11 rounded bg-secondary" />
                 <div className="flex-1">
-                  <div className="h-5 bg-muted rounded w-3/4 mb-2" />
-                  <div className="h-4 bg-muted rounded w-1/2" />
+                  <div className="h-4 bg-secondary rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-secondary rounded w-1/2" />
                 </div>
               </div>
-              <div className="h-4 bg-muted rounded w-full mb-2" />
-              <div className="h-4 bg-muted rounded w-2/3 mb-4" />
-              <div className="h-10 bg-muted rounded w-full" />
+              <div className="h-3 bg-secondary rounded w-full mb-2" />
+              <div className="h-3 bg-secondary rounded w-2/3 mb-4" />
+              <div className="h-10 bg-secondary rounded w-full" />
             </div>
           ))}
         </div>
       ) : filteredApks.length === 0 ? (
         <div className="text-center py-16">
-          <div className="w-20 h-20 mx-auto rounded-full bg-muted flex items-center justify-center mb-4">
-            <Package className="w-10 h-10 text-muted-foreground" />
+          <div className="w-16 h-16 mx-auto rounded bg-secondary flex items-center justify-center mb-4">
+            <Package className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            {searchQuery ? "No apps found" : "No APKs uploaded yet"}
+          <h3 className="text-base font-bold text-foreground mb-1 uppercase tracking-wider">
+            {searchQuery ? "Tidak Ditemukan" : "Belum Ada APK"}
           </h3>
-          <p className="text-muted-foreground">
+          <p className="text-xs text-muted-foreground font-mono">
             {searchQuery
-              ? "Try a different search term"
-              : "Upload your first APK to get started!"}
+              ? "Coba kata kunci lain"
+              : "Upload APK pertama untuk memulai"}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredApks.map((apk, index) => (
             <ApkCard
               key={apk.id}
