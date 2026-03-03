@@ -18,7 +18,7 @@ export function Navbar() {
               className="w-8 h-8 rounded object-cover"
             />
             <span className="text-lg font-bold tracking-wider text-foreground uppercase">
-              APK Uploader
+              DEIMOS MODS™
             </span>
           </div>
 
