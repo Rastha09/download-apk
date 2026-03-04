@@ -164,13 +164,13 @@ export function ApkEditModal({
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     disabled={isSaving}
-                    className="min-h-[80px] resize-none"
+                    className="min-h-[120px] resize-y"
                   />
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-2">
-                  <Button onClick={handleSave} disabled={isSaving} className="flex-1 h-11 font-semibold gradient-hero hover:opacity-90 transition-opacity">
+                  <Button onClick={handleSave} disabled={isSaving} className="flex-1 h-11 font-bold uppercase tracking-wider bg-primary text-primary-foreground hover:bg-primary/90 rounded-[4px] transition-all">
                     {isSaving ? (<><Loader2 className="w-5 h-5 mr-2 animate-spin" />Menyimpan...</>) : (<><Save className="w-5 h-5 mr-2" />Simpan</>)}
                   </Button>
                   <Button variant="outline" onClick={onClose} disabled={isSaving} className="h-11 px-5">Batal</Button>

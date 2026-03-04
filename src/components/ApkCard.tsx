@@ -233,7 +233,7 @@ export function ApkCard({
           </div>
 
           {/* Description */}
-          <p className="text-xs text-muted-foreground mb-3 line-clamp-2 font-mono">{description}</p>
+          <p className="text-xs text-muted-foreground mb-3 line-clamp-4 font-mono whitespace-pre-line">{description}</p>
 
           {/* Meta */}
           <div className="flex items-center gap-3 text-[10px] text-muted-foreground mb-4 flex-wrap font-mono">
