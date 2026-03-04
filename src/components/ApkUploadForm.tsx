@@ -323,7 +323,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
             <Button
               type="submit"
               disabled={isUploading}
-              className="flex-1 h-12 text-base font-semibold gradient-hero hover:opacity-90 transition-opacity"
+              className="flex-1 h-12 text-base font-bold uppercase tracking-wider bg-primary text-primary-foreground hover:bg-primary/90 rounded-[4px] transition-all"
             >
               {isUploading ? (
                 <>
