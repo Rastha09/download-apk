@@ -313,6 +313,7 @@ export function ApkCard({
       <DownloadModal
         isOpen={showModal}
         appName={appName}
+        iconUrl={iconUrl}
         isLoading={isRedirecting}
         onConfirm={handleConfirmDownload}
         onCancel={() => {
