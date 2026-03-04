@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { ParticleBackground } from "@/components/ParticleBackground";
 import Swal from "sweetalert2";
 
 const Auth = () => {
@@ -179,20 +180,21 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
+      <ParticleBackground />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
-        <div className="bg-card rounded-2xl shadow-lg border border-border p-8">
+        <div className="bg-card rounded-[4px] shadow-lg border border-border p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl gradient-hero flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-[4px] bg-primary flex items-center justify-center mx-auto mb-4">
               {isLogin ? (
-                <LogIn className="w-8 h-8 text-primary-foreground" />
+                <LogIn className="w-8 h-8 text-background" />
               ) : (
-                <UserPlus className="w-8 h-8 text-primary-foreground" />
+                <UserPlus className="w-8 h-8 text-background" />
               )}
             </div>
             <h1 className="text-2xl font-bold text-foreground">
@@ -241,7 +243,7 @@ const Auth = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 text-base font-semibold gradient-hero hover:opacity-90 transition-opacity"
+              className="w-full h-12 text-base font-semibold bg-primary text-background hover:bg-primary/90 transition-all rounded-[4px]"
             >
               {loading ? (
                 <>
