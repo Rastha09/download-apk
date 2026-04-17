@@ -2,8 +2,8 @@ import { motion } from "framer-motion";
 import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Package, Layers, BarChart3, Pencil, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { useRef, useState } from "react";
-import { toast } from "sonner";
 import Swal from "sweetalert2";
 import { supabase } from "@/integrations/supabase/client";
 import { DownloadModal } from "@/components/DownloadModal";
@@ -55,12 +55,32 @@ export function ApkCard({
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [replacing, setReplacing] = useState(false);
+  const [replaceProgress, setReplaceProgress] = useState(0);
   const replaceInputRef = useRef<HTMLInputElement>(null);
+  const replaceXhrRef = useRef<XMLHttpRequest | null>(null);
   const { checkCooldown, recordClick } = useDownloadCooldown();
 
   const handleReplaceClick = () => {
     if (replacing) return;
     replaceInputRef.current?.click();
+  };
+
+  const handleCancelReplace = () => {
+    if (replaceXhrRef.current) {
+      replaceXhrRef.current.abort();
+      replaceXhrRef.current = null;
+      setReplacing(false);
+      setReplaceProgress(0);
+      Swal.fire({
+        icon: "info",
+        title: "Upload Dibatalkan",
+        text: "Proses upload telah dibatalkan.",
+        timer: 1500,
+        showConfirmButton: false,
+        toast: true,
+        position: "top-end",
+      });
+    }
   };
 
   const handleReplaceFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,28 +90,56 @@ export function ApkCard({
 
     const lower = file.name.toLowerCase();
     if (!lower.endsWith(".apk") && !lower.endsWith(".apks")) {
-      toast.error("Hanya file .apk atau .apks yang diizinkan");
+      Swal.fire({
+        icon: "error",
+        title: "Invalid File",
+        text: "Only .apk and .apks files are allowed!",
+        confirmButtonColor: "hsl(145 65% 42%)",
+      });
       return;
     }
     if (file.size > 500 * 1024 * 1024) {
-      toast.error("Ukuran file maksimal 500MB");
+      Swal.fire({
+        icon: "error",
+        title: "File Too Large",
+        text: "Maximum file size is 500MB!",
+        confirmButtonColor: "hsl(145 65% 42%)",
+      });
       return;
     }
 
     setReplacing(true);
+    setReplaceProgress(0);
     try {
-      // Upload to a new path to avoid CDN cache issues, keep the row intact
       const timestamp = Date.now();
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
       const newPath = `${timestamp}_${sanitizedName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("apk-files")
-        .upload(newPath, file, {
-          contentType: file.type || "application/octet-stream",
-          upsert: false,
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+      const uploadUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/apk-files/${newPath}`;
+
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        replaceXhrRef.current = xhr;
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            setReplaceProgress(Math.round((event.loaded / event.total) * 100));
+          }
         });
-      if (uploadError) throw uploadError;
+        xhr.addEventListener("load", () => {
+          replaceXhrRef.current = null;
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error(`Upload failed with status ${xhr.status}`));
+        });
+        xhr.addEventListener("error", () => { replaceXhrRef.current = null; reject(new Error("Upload failed")); });
+        xhr.addEventListener("abort", () => { replaceXhrRef.current = null; reject(new Error("Upload cancelled")); });
+        xhr.open("POST", uploadUrl);
+        xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+        xhr.setRequestHeader("apikey", import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+        xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+        xhr.send(file);
+      });
 
       const { data: urlData } = supabase.storage.from("apk-files").getPublicUrl(newPath);
 
@@ -105,23 +153,33 @@ export function ApkCard({
         })
         .eq("id", id);
       if (updateError) {
-        // Rollback storage upload on db failure
         await supabase.storage.from("apk-files").remove([newPath]);
         throw updateError;
       }
 
-      // Best-effort cleanup of old file
       if (filePath && filePath !== newPath) {
         await supabase.storage.from("apk-files").remove([filePath]);
       }
 
-      toast.success("APK berhasil diperbarui!");
+      Swal.fire({
+        icon: "success",
+        title: "APK berhasil diperbarui!",
+        text: "File APK telah diganti tanpa mengubah statistik.",
+        confirmButtonColor: "hsl(145 65% 42%)",
+      });
       onEdit?.();
     } catch (err: any) {
+      if (err.message === "Upload cancelled") return;
       console.error("Replace APK error:", err);
-      toast.error(err.message || "Gagal memperbarui APK");
+      Swal.fire({
+        icon: "error",
+        title: "Upload Failed",
+        text: err.message || "Gagal memperbarui APK",
+        confirmButtonColor: "hsl(145 65% 42%)",
+      });
     } finally {
       setReplacing(false);
+      setReplaceProgress(0);
     }
   };
 
@@ -345,11 +403,22 @@ export function ApkCard({
             </div>
           )}
 
+          {/* Replace Progress */}
+          {replacing && (
+            <div className="mb-3 space-y-1.5">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-muted-foreground uppercase tracking-wider">Mengganti APK...</span>
+                <span className="font-bold text-primary">{replaceProgress}%</span>
+              </div>
+              <Progress value={replaceProgress} className="h-2" />
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex gap-2">
             <Button
               onClick={handleDownloadClick}
-              disabled={deleting}
+              disabled={deleting || replacing}
               className="flex-1 h-10 font-bold text-sm uppercase tracking-wider bg-primary text-primary-foreground hover:glow-pulse rounded transition-all duration-200"
             >
               <Download className="w-4 h-4 mr-2" />
@@ -364,15 +433,26 @@ export function ApkCard({
                   className="hidden"
                   onChange={handleReplaceFile}
                 />
-                <Button
-                  variant="outline"
-                  onClick={handleReplaceClick}
-                  disabled={deleting || replacing}
-                  title="Ganti file APK"
-                  className="h-10 px-3 rounded border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                >
-                  <RefreshCw className={`w-4 h-4 ${replacing ? "animate-spin" : ""}`} />
-                </Button>
+                {replacing ? (
+                  <Button
+                    variant="outline"
+                    onClick={handleCancelReplace}
+                    title="Batalkan upload"
+                    className="h-10 px-3 rounded border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  >
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={handleReplaceClick}
+                    disabled={deleting}
+                    title="Ganti file APK"
+                    className="h-10 px-3 rounded border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   onClick={() => setShowEditModal(true)}
@@ -386,7 +466,7 @@ export function ApkCard({
             {showDelete && (
               <Button
                 onClick={handleDelete}
-                disabled={deleting}
+                disabled={deleting || replacing}
                 variant="outline"
                 className="h-10 px-3 rounded border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
               >
