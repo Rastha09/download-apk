@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Package, Layers, BarChart3, Pencil } from "lucide-react";
+import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Package, Layers, BarChart3, Pencil, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 import Swal from "sweetalert2";
 import { supabase } from "@/integrations/supabase/client";
 import { DownloadModal } from "@/components/DownloadModal";
@@ -53,7 +54,76 @@ export function ApkCard({
   const [showEditModal, setShowEditModal] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [replacing, setReplacing] = useState(false);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
   const { checkCooldown, recordClick } = useDownloadCooldown();
+
+  const handleReplaceClick = () => {
+    if (replacing) return;
+    replaceInputRef.current?.click();
+  };
+
+  const handleReplaceFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (e.target) e.target.value = "";
+    if (!file) return;
+
+    const lower = file.name.toLowerCase();
+    if (!lower.endsWith(".apk") && !lower.endsWith(".apks")) {
+      toast.error("Hanya file .apk atau .apks yang diizinkan");
+      return;
+    }
+    if (file.size > 500 * 1024 * 1024) {
+      toast.error("Ukuran file maksimal 500MB");
+      return;
+    }
+
+    setReplacing(true);
+    try {
+      // Upload to a new path to avoid CDN cache issues, keep the row intact
+      const timestamp = Date.now();
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const newPath = `${timestamp}_${sanitizedName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("apk-files")
+        .upload(newPath, file, {
+          contentType: file.type || "application/octet-stream",
+          upsert: false,
+        });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("apk-files").getPublicUrl(newPath);
+
+      const { error: updateError } = await supabase
+        .from("apk_uploads")
+        .update({
+          file_name: file.name,
+          file_path: newPath,
+          file_size: file.size,
+          download_url: urlData.publicUrl,
+        })
+        .eq("id", id);
+      if (updateError) {
+        // Rollback storage upload on db failure
+        await supabase.storage.from("apk-files").remove([newPath]);
+        throw updateError;
+      }
+
+      // Best-effort cleanup of old file
+      if (filePath && filePath !== newPath) {
+        await supabase.storage.from("apk-files").remove([filePath]);
+      }
+
+      toast.success("APK berhasil diperbarui!");
+      onEdit?.();
+    } catch (err: any) {
+      console.error("Replace APK error:", err);
+      toast.error(err.message || "Gagal memperbarui APK");
+    } finally {
+      setReplacing(false);
+    }
+  };
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "Unknown size";
@@ -286,14 +356,32 @@ export function ApkCard({
               Download
             </Button>
             {isAdmin && (
-              <Button
-                variant="outline"
-                onClick={() => setShowEditModal(true)}
-                disabled={deleting}
-                className="h-10 px-3 rounded"
-              >
-                <Pencil className="w-4 h-4" />
-              </Button>
+              <>
+                <input
+                  ref={replaceInputRef}
+                  type="file"
+                  accept=".apk,.apks"
+                  className="hidden"
+                  onChange={handleReplaceFile}
+                />
+                <Button
+                  variant="outline"
+                  onClick={handleReplaceClick}
+                  disabled={deleting || replacing}
+                  title="Ganti file APK"
+                  className="h-10 px-3 rounded border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                >
+                  <RefreshCw className={`w-4 h-4 ${replacing ? "animate-spin" : ""}`} />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowEditModal(true)}
+                  disabled={deleting || replacing}
+                  className="h-10 px-3 rounded"
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+              </>
             )}
             {showDelete && (
               <Button
