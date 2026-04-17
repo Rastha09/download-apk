@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Package, Upload, Moon, Sun, Globe, HelpCircle, Info, LogIn, LogOut, Check } from "lucide-react";
+import { Home, Package, Upload, Moon, Sun, Globe, HelpCircle, Info, LogIn, LogOut, Check, Shield } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -14,7 +14,7 @@ interface SideDrawerProps {
 
 export function SideDrawer({ open, onClose }: SideDrawerProps) {
   const { theme, setTheme } = useTheme();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, isSuperAdmin, signOut } = useAuth();
   const [showFaq, setShowFaq] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showLang, setShowLang] = useState(false);
@@ -37,6 +37,7 @@ export function SideDrawer({ open, onClose }: SideDrawerProps) {
     { icon: Home, label: "Beranda", href: "/" },
     { icon: Package, label: "Semua APK", href: "/" },
     ...(isAdmin ? [{ icon: Upload, label: "Upload APK", href: "/" }] : []),
+    ...(isSuperAdmin ? [{ icon: Shield, label: "Manage Admins", href: "/manage-admins" }] : []),
   ];
 
   return (
