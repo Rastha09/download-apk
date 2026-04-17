@@ -7,6 +7,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -21,6 +22,7 @@ export function AuthProvider(props: AuthProviderProps): React.ReactElement {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -34,6 +36,7 @@ export function AuthProvider(props: AuthProviderProps): React.ReactElement {
           }, 0);
         } else {
           setIsAdmin(false);
+          setIsSuperAdmin(false);
         }
       }
     );
@@ -57,17 +60,22 @@ export function AuthProvider(props: AuthProviderProps): React.ReactElement {
         .from("user_roles")
         .select("role")
         .eq("user_id", userId)
-        .eq("role", "admin");
+        .in("role", ["admin", "super_admin"]);
 
       if (error) {
         console.error("Error checking admin role:", error);
         setIsAdmin(false);
+        setIsSuperAdmin(false);
       } else {
-        setIsAdmin(data && data.length > 0);
+        const roles = (data ?? []).map((r) => r.role);
+        const superAdmin = roles.includes("super_admin" as never);
+        setIsSuperAdmin(superAdmin);
+        setIsAdmin(superAdmin || roles.includes("admin" as never));
       }
     } catch (error) {
       console.error("Error checking admin role:", error);
       setIsAdmin(false);
+      setIsSuperAdmin(false);
     }
   };
 
@@ -80,6 +88,7 @@ export function AuthProvider(props: AuthProviderProps): React.ReactElement {
     session,
     loading,
     isAdmin,
+    isSuperAdmin,
     signOut,
   };
 

@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import GoRedirect from "./pages/GoRedirect";
 import SafelinkPage from "./pages/SafelinkPage";
+import ManageAdmins from "./pages/ManageAdmins";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/go/:slug" element={<GoRedirect />} />
               <Route path="/safelink/:apkId" element={<SafelinkPage />} />
+              <Route path="/manage-admins" element={<ManageAdmins />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
