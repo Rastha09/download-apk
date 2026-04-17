@@ -356,14 +356,32 @@ export function ApkCard({
               Download
             </Button>
             {isAdmin && (
-              <Button
-                variant="outline"
-                onClick={() => setShowEditModal(true)}
-                disabled={deleting}
-                className="h-10 px-3 rounded"
-              >
-                <Pencil className="w-4 h-4" />
-              </Button>
+              <>
+                <input
+                  ref={replaceInputRef}
+                  type="file"
+                  accept=".apk,.apks"
+                  className="hidden"
+                  onChange={handleReplaceFile}
+                />
+                <Button
+                  variant="outline"
+                  onClick={handleReplaceClick}
+                  disabled={deleting || replacing}
+                  title="Ganti file APK"
+                  className="h-10 px-3 rounded border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                >
+                  <RefreshCw className={`w-4 h-4 ${replacing ? "animate-spin" : ""}`} />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowEditModal(true)}
+                  disabled={deleting || replacing}
+                  className="h-10 px-3 rounded"
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+              </>
             )}
             {showDelete && (
               <Button
