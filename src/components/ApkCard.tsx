@@ -403,11 +403,22 @@ export function ApkCard({
             </div>
           )}
 
+          {/* Replace Progress */}
+          {replacing && (
+            <div className="mb-3 space-y-1.5">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-muted-foreground uppercase tracking-wider">Mengganti APK...</span>
+                <span className="font-bold text-primary">{replaceProgress}%</span>
+              </div>
+              <Progress value={replaceProgress} className="h-2" />
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex gap-2">
             <Button
               onClick={handleDownloadClick}
-              disabled={deleting}
+              disabled={deleting || replacing}
               className="flex-1 h-10 font-bold text-sm uppercase tracking-wider bg-primary text-primary-foreground hover:glow-pulse rounded transition-all duration-200"
             >
               <Download className="w-4 h-4 mr-2" />
@@ -422,15 +433,26 @@ export function ApkCard({
                   className="hidden"
                   onChange={handleReplaceFile}
                 />
-                <Button
-                  variant="outline"
-                  onClick={handleReplaceClick}
-                  disabled={deleting || replacing}
-                  title="Ganti file APK"
-                  className="h-10 px-3 rounded border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                >
-                  <RefreshCw className={`w-4 h-4 ${replacing ? "animate-spin" : ""}`} />
-                </Button>
+                {replacing ? (
+                  <Button
+                    variant="outline"
+                    onClick={handleCancelReplace}
+                    title="Batalkan upload"
+                    className="h-10 px-3 rounded border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  >
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={handleReplaceClick}
+                    disabled={deleting}
+                    title="Ganti file APK"
+                    className="h-10 px-3 rounded border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   onClick={() => setShowEditModal(true)}
@@ -444,7 +466,7 @@ export function ApkCard({
             {showDelete && (
               <Button
                 onClick={handleDelete}
-                disabled={deleting}
+                disabled={deleting || replacing}
                 variant="outline"
                 className="h-10 px-3 rounded border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
               >
