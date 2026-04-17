@@ -60,8 +60,19 @@ export function ApkCard({
   const replaceXhrRef = useRef<XMLHttpRequest | null>(null);
   const { checkCooldown, recordClick } = useDownloadCooldown();
 
-  const handleReplaceClick = () => {
+  const handleReplaceClick = async () => {
     if (replacing) return;
+    const result = await Swal.fire({
+      title: "Ganti File APK?",
+      html: `Anda akan mengganti file APK untuk <b>${appName}</b>.<br/><br/>Statistik (download & view count) <b>tidak akan direset</b>. Nama, deskripsi, dan versi tetap sama.`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "hsl(145 65% 42%)",
+      cancelButtonColor: "hsl(var(--muted))",
+      confirmButtonText: "Ya, Pilih File Baru",
+      cancelButtonText: "Batal",
+    });
+    if (!result.isConfirmed) return;
     replaceInputRef.current?.click();
   };
 
