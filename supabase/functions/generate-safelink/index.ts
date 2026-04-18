@@ -10,15 +10,47 @@ const corsHeaders = {
 const cache = new Map<string, { shortlink: string; expiresAt: number }>();
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
+// Simple in-memory rate limiter: key -> { count, resetAt }
+const rateLimit = new Map<string, { count: number; resetAt: number }>();
+const RATE_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_MAX = 10; // max 10 requests per IP per minute
+
+function checkRateLimit(key: string): boolean {
+  const now = Date.now();
+  const entry = rateLimit.get(key);
+  if (!entry || entry.resetAt < now) {
+    rateLimit.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_MAX) return false;
+  entry.count += 1;
+  return true;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { apkId } = await req.json();
-    if (!apkId) {
-      return new Response(JSON.stringify({ error: "apkId is required" }), {
+    // Rate limit by client IP to prevent API credit abuse
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+      req.headers.get("cf-connecting-ip") ||
+      "unknown";
+    if (!checkRateLimit(ip)) {
+      return new Response(JSON.stringify({ error: "Too many requests" }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const body = await req.json().catch(() => null);
+    const apkId = body?.apkId;
+    // Validate apkId is a UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!apkId || typeof apkId !== "string" || !uuidRegex.test(apkId)) {
+      return new Response(JSON.stringify({ error: "Valid apkId is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -69,11 +101,11 @@ Deno.serve(async (req) => {
     });
 
     const responseText = await safelinkRes.text();
-    console.log("Safelinku API status:", safelinkRes.status, "response:", responseText.substring(0, 500));
+    console.log("Safelinku API status:", safelinkRes.status);
 
     if (!safelinkRes.ok) {
       return new Response(
-        JSON.stringify({ error: "Safelinku API error", detail: responseText.substring(0, 200) }),
+        JSON.stringify({ error: "Safelinku API error" }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -81,7 +113,6 @@ Deno.serve(async (req) => {
     let shortlink: string;
     try {
       const safelinkData = JSON.parse(responseText);
-      // Try common response field names
       shortlink = safelinkData.shortenedUrl || safelinkData.shortened || safelinkData.short || safelinkData.link || safelinkData.url || safelinkData.data?.link || safelinkData.data?.url || safelinkData.data?.shortenedUrl || "";
     } catch {
       const urlMatch = responseText.match(/https?:\/\/[^\s<"']+/);
@@ -95,7 +126,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Increment download count
+    // Increment download count (server-side only, prevents client-side stat manipulation)
     await supabase.rpc("increment_download_count", { apk_id: apkId });
 
     // Cache result

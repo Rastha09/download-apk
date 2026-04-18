@@ -73,13 +73,8 @@ export default function SafelinkPage() {
 
   const handleDownload = async () => {
     if (!redirectSlug || !apkId) return;
-
-    try {
-      await supabase.rpc("increment_download_count", { apk_id: apkId });
-    } catch (e) {
-      console.error("Error incrementing download count:", e);
-    }
-
+    // Download count is incremented server-side in the generate-safelink edge function
+    // to prevent unauthenticated stat manipulation.
     window.location.replace(`/go/${redirectSlug}`);
   };
 
