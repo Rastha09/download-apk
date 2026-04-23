@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Only admins can list APK files" ON storage.objects;
