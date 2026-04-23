@@ -226,7 +226,8 @@ const ManageLicenseKeys = () => {
           ) : grouped.length === 0 ? (
             <div className="p-10 text-center text-muted-foreground font-mono">Belum ada license key.</div>
           ) : (
-            <Table>
+            <div className="overflow-x-auto">
+            <Table className="min-w-[760px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Key</TableHead>
@@ -240,18 +241,18 @@ const ManageLicenseKeys = () => {
                 {grouped.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell className="font-mono text-xs md:text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="break-all">{row.key_string}</span>
+                      <div className="flex min-w-[220px] items-center gap-2">
+                        <span className="whitespace-nowrap">{row.key_string}</span>
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
                           onClick={() => handleCopyKey(row.key_string)}
-                          className="h-8 w-8 shrink-0 p-0"
+                          className="h-7 w-7 shrink-0 p-0"
                           aria-label={`Copy key ${row.key_string}`}
                           title="Copy key"
                         >
-                          <Copy className="w-4 h-4" />
+                          <Copy className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </TableCell>
@@ -284,6 +285,7 @@ const ManageLicenseKeys = () => {
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </section>
       </main>
