@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
+  isAuthenticated: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -89,6 +90,7 @@ export function AuthProvider(props: AuthProviderProps): React.ReactElement {
     loading,
     isAdmin,
     isSuperAdmin,
+    isAuthenticated: !!user,
     signOut,
   };
 

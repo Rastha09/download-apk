@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Download, Copy, Check, Calendar, HardDrive, Smartphone, Trash2, Package, Layers, BarChart3, Pencil, RefreshCw } from "lucide-react";
+import { Download, Copy, Check, Calendar, Smartphone, Trash2, BarChart3, Pencil, RefreshCw, Gem, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -15,6 +15,7 @@ interface ApkCardProps {
   appName: string;
   version: string;
   description: string;
+  category?: "free" | "donation";
   fileName: string;
   filePath: string;
   downloadUrl: string;
@@ -35,6 +36,7 @@ export function ApkCard({
   appName,
   version,
   description,
+  category = "free",
   fileName,
   filePath,
   downloadUrl,
@@ -356,6 +358,12 @@ export function ApkCard({
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <span className="inline-flex items-center px-2 py-0.5 rounded border border-accent/40 text-[10px] font-bold font-mono text-accent uppercase">
                   v{version}
+                </span>
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase ${
+                  category === "donation" ? "bg-primary/15 text-primary border border-primary/30" : "bg-secondary text-secondary-foreground border border-border"
+                }`}>
+                  {category === "donation" ? <Gem className="w-3 h-3" /> : <Gift className="w-3 h-3" />}
+                  {category === "donation" ? "Donasi" : "Gratis"}
                 </span>
                 <span
                   className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase ${

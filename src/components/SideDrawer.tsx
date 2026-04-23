@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Package, Upload, Moon, Sun, Globe, HelpCircle, Info, LogIn, LogOut, Check, Shield } from "lucide-react";
+import { Home, Package, Upload, Moon, Sun, Globe, HelpCircle, Info, LogIn, LogOut, Check, Shield, Gem, KeyRound } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -36,7 +36,9 @@ export function SideDrawer({ open, onClose }: SideDrawerProps) {
   const menuItems = [
     { icon: Home, label: "Beranda", href: "/" },
     { icon: Package, label: "Semua APK", href: "/" },
+    { icon: Gem, label: "APK Donasi", href: "/donasi" },
     ...(isAdmin ? [{ icon: Upload, label: "Upload APK", href: "/" }] : []),
+    ...(isAdmin ? [{ icon: KeyRound, label: "License Keys", href: "/admin/license-keys" }] : []),
     ...(isSuperAdmin ? [{ icon: Shield, label: "Manage Admins", href: "/manage-admins" }] : []),
   ];
 

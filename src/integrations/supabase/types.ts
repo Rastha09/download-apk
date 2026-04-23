@@ -46,6 +46,7 @@ export type Database = {
       apk_uploads: {
         Row: {
           app_name: string
+          category: Database["public"]["Enums"]["apk_category"]
           created_at: string
           description: string
           download_count: number
@@ -56,10 +57,12 @@ export type Database = {
           icon_url: string | null
           id: string
           linkvertise_urls: string[] | null
+          updated_at: string
           version: string
         }
         Insert: {
           app_name: string
+          category?: Database["public"]["Enums"]["apk_category"]
           created_at?: string
           description: string
           download_count?: number
@@ -70,10 +73,12 @@ export type Database = {
           icon_url?: string | null
           id?: string
           linkvertise_urls?: string[] | null
+          updated_at?: string
           version: string
         }
         Update: {
           app_name?: string
+          category?: Database["public"]["Enums"]["apk_category"]
           created_at?: string
           description?: string
           download_count?: number
@@ -84,7 +89,38 @@ export type Database = {
           icon_url?: string | null
           id?: string
           linkvertise_urls?: string[] | null
+          updated_at?: string
           version?: string
+        }
+        Relationships: []
+      }
+      license_keys: {
+        Row: {
+          bound_ip: unknown
+          created_at: string
+          created_by: string | null
+          expiry_date: string
+          id: string
+          is_active: boolean
+          key_string: string
+        }
+        Insert: {
+          bound_ip?: unknown
+          created_at?: string
+          created_by?: string | null
+          expiry_date: string
+          id?: string
+          is_active?: boolean
+          key_string: string
+        }
+        Update: {
+          bound_ip?: unknown
+          created_at?: string
+          created_by?: string | null
+          expiry_date?: string
+          id?: string
+          is_active?: boolean
+          key_string?: string
         }
         Relationships: []
       }
@@ -126,8 +162,17 @@ export type Database = {
       }
       increment_download_count: { Args: { apk_id: string }; Returns: undefined }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      validate_license_key: {
+        Args: { _client_ip: string; _key: string }
+        Returns: {
+          expiry_date: string
+          is_valid: boolean
+          message: string
+        }[]
+      }
     }
     Enums: {
+      apk_category: "free" | "donation"
       app_role: "admin" | "user" | "super_admin"
     }
     CompositeTypes: {
@@ -256,6 +301,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      apk_category: ["free", "donation"],
       app_role: ["admin", "user", "super_admin"],
     },
   },

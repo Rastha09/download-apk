@@ -11,6 +11,7 @@ interface ApkUpload {
   app_name: string;
   version: string;
   description: string;
+  category: "free" | "donation";
   file_name: string;
   file_path: string;
   download_url: string;
@@ -24,9 +25,11 @@ interface ApkUpload {
 interface ApkListProps {
   refreshTrigger: number;
   isAdmin?: boolean;
+  category?: "free" | "donation";
+  title?: string;
 }
 
-export function ApkList({ refreshTrigger, isAdmin = false }: ApkListProps) {
+export function ApkList({ refreshTrigger, isAdmin = false, category = "free", title }: ApkListProps) {
   const [apks, setApks] = useState<ApkUpload[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,6 +40,7 @@ export function ApkList({ refreshTrigger, isAdmin = false }: ApkListProps) {
       const { data, error } = await supabase
         .from("apk_uploads")
         .select("*")
+        .eq("category", category)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -72,7 +76,7 @@ export function ApkList({ refreshTrigger, isAdmin = false }: ApkListProps) {
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5 text-accent" />
             <h2 className="text-lg font-bold text-foreground uppercase tracking-wider">
-              Uploaded APK/APKS
+              {title ?? (category === "donation" ? "Donation APK/APKS" : "Uploaded APK/APKS")}
             </h2>
             <span className="text-xs font-mono text-muted-foreground">
               [{apks.length}]
@@ -151,6 +155,7 @@ export function ApkList({ refreshTrigger, isAdmin = false }: ApkListProps) {
               fileSize={apk.file_size ?? undefined}
               downloadCount={apk.download_count}
               iconUrl={apk.icon_url ?? undefined}
+              category={apk.category}
               
               createdAt={apk.created_at}
               index={index}

@@ -162,7 +162,7 @@ const ManageAdmins = () => {
           Kembali
         </Link>
 
-        <div className="flex items-center gap-3 mb-8">
+        <header className="flex items-center gap-3 mb-8">
           <div className="p-2.5 rounded bg-primary/10 border border-primary/30">
             <Shield className="w-6 h-6 text-primary" />
           </div>
@@ -174,7 +174,7 @@ const ManageAdmins = () => {
               Super Admin Panel
             </p>
           </div>
-        </div>
+        </header>
 
         {/* Invite Form */}
         <div className="bg-card border border-border rounded p-5 mb-6">

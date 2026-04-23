@@ -4,6 +4,7 @@ import { Upload, FileUp, Loader2, CheckCircle, X, Smartphone } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import Swal from "sweetalert2";
 import { extractApkIcon } from "@/lib/apk-icon-extractor";
@@ -14,6 +15,7 @@ interface ApkUploadFormProps {
 
 export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [category, setCategory] = useState<"free" | "donation">("free");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
@@ -194,6 +196,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
         app_name: appName,
         version: version,
         description: description,
+        category,
         file_name: selectedFile.name,
         file_path: filePath,
         download_url: downloadUrl,
@@ -247,6 +250,30 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-3">
+            <Label>Kategori APK</Label>
+            <RadioGroup
+              value={category}
+              onValueChange={(value) => setCategory(value as "free" | "donation")}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+            >
+              <label className="flex items-start gap-3 rounded border border-border bg-secondary/40 p-4 cursor-pointer hover:border-primary/50 transition-colors">
+                <RadioGroupItem value="free" id="category-free" className="mt-0.5" />
+                <div>
+                  <p className="font-semibold text-foreground uppercase tracking-wider">Gratis</p>
+                  <p className="text-xs text-muted-foreground font-mono">Tampil di daftar publik utama.</p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 rounded border border-border bg-secondary/40 p-4 cursor-pointer hover:border-primary/50 transition-colors">
+                <RadioGroupItem value="donation" id="category-donation" className="mt-0.5" />
+                <div>
+                  <p className="font-semibold text-foreground uppercase tracking-wider">Donasi</p>
+                  <p className="text-xs text-muted-foreground font-mono">Hanya tampil di halaman /donasi dengan license key.</p>
+                </div>
+              </label>
+            </RadioGroup>
+          </div>
+
           <div className="space-y-2">
             <Label>APK/APKS File</Label>
             <div
