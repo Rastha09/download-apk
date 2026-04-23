@@ -44,8 +44,13 @@ Deno.serve(async (req) => {
     }
 
     const result = Array.isArray(data) ? data[0] : data;
+
+    if (!result || typeof result.is_valid !== "boolean") {
+      throw new Error("Invalid validation response");
+    }
+
     return new Response(JSON.stringify(result), {
-      status: result?.is_valid ? 200 : 403,
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
