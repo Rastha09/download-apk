@@ -196,10 +196,6 @@ const ManageLicenseKeys = () => {
                   <RefreshCw className="w-4 h-4" />
                   Generate
                 </Button>
-                <Button type="button" variant="outline" onClick={() => handleCopyKey(keyString)} className="uppercase font-mono" disabled={!keyString.trim()}>
-                  <Copy className="w-4 h-4" />
-                  Copy
-                </Button>
               </div>
             </div>
             <div className="space-y-2">
@@ -251,7 +247,9 @@ const ManageLicenseKeys = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => handleCopyKey(row.key_string)}
-                          className="font-mono uppercase shrink-0"
+                          className="h-8 w-8 shrink-0 p-0"
+                          aria-label={`Copy key ${row.key_string}`}
+                          title="Copy key"
                         >
                           <Copy className="w-4 h-4" />
                         </Button>
