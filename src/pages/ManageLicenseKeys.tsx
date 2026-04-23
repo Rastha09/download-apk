@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Navigate, Link } from "react-router-dom";
-import { ArrowLeft, KeyRound, Loader2, RotateCcw, ShieldCheck, Trash2, Plus, RefreshCw } from "lucide-react";
+import { ArrowLeft, Copy, KeyRound, Loader2, RotateCcw, ShieldCheck, Trash2, Plus, RefreshCw } from "lucide-react";
 import Swal from "sweetalert2";
 import { Navbar } from "@/components/Navbar";
 import { ParticleBackground } from "@/components/ParticleBackground";
@@ -77,6 +77,26 @@ const ManageLicenseKeys = () => {
   if (!isAdmin) return <Navigate to="/" replace />;
 
   const handleGenerate = () => setKeyString(createRandomKey());
+
+  const handleCopyKey = async (value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      await Swal.fire({
+        icon: "success",
+        title: "Key berhasil disalin",
+        text: value,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal menyalin key",
+        text: "Browser tidak mengizinkan akses clipboard.",
+        confirmButtonColor: "hsl(145 65% 42%)",
+      });
+    }
+  };
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
@@ -176,6 +196,10 @@ const ManageLicenseKeys = () => {
                   <RefreshCw className="w-4 h-4" />
                   Generate
                 </Button>
+                <Button type="button" variant="outline" onClick={() => handleCopyKey(keyString)} className="uppercase font-mono" disabled={!keyString.trim()}>
+                  <Copy className="w-4 h-4" />
+                  Copy
+                </Button>
               </div>
             </div>
             <div className="space-y-2">
@@ -219,7 +243,20 @@ const ManageLicenseKeys = () => {
               <TableBody>
                 {grouped.map((row) => (
                   <TableRow key={row.id}>
-                    <TableCell className="font-mono text-xs md:text-sm">{row.key_string}</TableCell>
+                    <TableCell className="font-mono text-xs md:text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="break-all">{row.key_string}</span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCopyKey(row.key_string)}
+                          className="font-mono uppercase shrink-0"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                     <TableCell className="font-mono text-xs">{new Date(row.expiry_date).toLocaleDateString("id-ID")}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-2">
