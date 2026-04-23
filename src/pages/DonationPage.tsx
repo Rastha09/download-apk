@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Gem, KeyRound, Loader2, ShieldCheck, AlertTriangle, LogOut } from "lucide-react";
 import Swal from "sweetalert2";
 import { Navbar } from "@/components/Navbar";
@@ -19,20 +19,142 @@ type ValidationResult = {
 const DonationPage = () => {
   const [licenseKey, setLicenseKey] = useState("");
   const [validating, setValidating] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [expiryDate, setExpiryDate] = useState<string | null>(null);
   const [refreshTrigger] = useState(0);
+  const revalidatingRef = useRef(false);
+
+  const invokeLicenseValidation = useCallback(async (key: string) => {
+    const { data, error } = await supabase.functions.invoke("validate-license-key", {
+      body: { key },
+    });
+
+    if (error) {
+      let message = error.message;
+      try {
+        const parsed = JSON.parse((error as { context?: { body?: string } }).context?.body ?? "{}");
+        message = parsed.error || parsed.message || message;
+      } catch {
+      }
+      throw new Error(message);
+    }
+
+    const result = data as ValidationResult;
+    if (!result?.is_valid) {
+      throw new Error(result?.message || "License key tidak valid");
+    }
+
+    return result;
+  }, []);
+
+  const revokeAccess = useCallback(async (message: string) => {
+    clearLicenseSession();
+    setAuthorized(false);
+    setExpiryDate(null);
+    setLicenseKey("");
+
+    await Swal.fire({
+      icon: "warning",
+      title: "License perlu divalidasi ulang",
+      text: message,
+      confirmButtonColor: "hsl(145 65% 42%)",
+    });
+  }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
+    const restoreSession = async () => {
+      const session = getLicenseSession();
+
+      if (!isLicenseSessionActive(session)) {
+        if (session) {
+          clearLicenseSession();
+        }
+        if (!cancelled) {
+          setCheckingSession(false);
+        }
+        return;
+      }
+
+      try {
+        const result = await invokeLicenseValidation(session.key);
+        if (cancelled) return;
+
+        saveLicenseSession({
+          key: session.key,
+          validatedAt: new Date().toISOString(),
+          expiryDate: result.expiry_date ?? session.expiryDate,
+        });
+        setAuthorized(true);
+        setLicenseKey(session.key);
+        setExpiryDate(result.expiry_date ?? session.expiryDate);
+      } catch (error) {
+        if (!cancelled) {
+          await revokeAccess((error as Error).message);
+        }
+      } finally {
+        if (!cancelled) {
+          setCheckingSession(false);
+        }
+      }
+    };
+
+    void restoreSession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [invokeLicenseValidation, revokeAccess]);
+
+  const revalidateActiveSession = useCallback(async () => {
     const session = getLicenseSession();
-    if (isLicenseSessionActive(session)) {
-      setAuthorized(true);
-      setLicenseKey(session?.key ?? "");
-      setExpiryDate(session?.expiryDate ?? null);
-    } else if (session) {
-      clearLicenseSession();
+    if (!session || !isLicenseSessionActive(session) || revalidatingRef.current) {
+      return;
     }
-  }, []);
+
+    revalidatingRef.current = true;
+
+    try {
+      const result = await invokeLicenseValidation(session.key);
+      saveLicenseSession({
+        key: session.key,
+        validatedAt: new Date().toISOString(),
+        expiryDate: result.expiry_date ?? session.expiryDate,
+      });
+      setAuthorized(true);
+      setLicenseKey(session.key);
+      setExpiryDate(result.expiry_date ?? session.expiryDate);
+    } catch (error) {
+      await revokeAccess((error as Error).message);
+    } finally {
+      revalidatingRef.current = false;
+    }
+  }, [invokeLicenseValidation, revokeAccess]);
+
+  useEffect(() => {
+    if (!authorized) return;
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        void revalidateActiveSession();
+      }
+    };
+
+    const intervalId = window.setInterval(() => {
+      void revalidateActiveSession();
+    }, 30000);
+
+    window.addEventListener("focus", handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [authorized, revalidateActiveSession]);
 
   const expiryText = useMemo(() => {
     if (!expiryDate) return null;
@@ -57,25 +179,7 @@ const DonationPage = () => {
 
     setValidating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("validate-license-key", {
-        body: { key: normalized },
-      });
-
-      if (error) {
-        let message = error.message;
-        try {
-          const parsed = JSON.parse((error as { context?: { body?: string } }).context?.body ?? "{}");
-          message = parsed.error || parsed.message || message;
-        } catch {
-          
-        }
-        throw new Error(message);
-      }
-
-      const result = data as ValidationResult;
-      if (!result?.is_valid) {
-        throw new Error(result?.message || "License key tidak valid");
-      }
+      const result = await invokeLicenseValidation(normalized);
 
       saveLicenseSession({
         key: normalized,
@@ -145,7 +249,14 @@ const DonationPage = () => {
           </div>
         </section>
 
-        {!authorized ? (
+        {checkingSession ? (
+          <section className="max-w-xl mx-auto border border-border bg-card rounded p-5 md:p-6">
+            <div className="flex items-center justify-center gap-3 text-sm font-mono text-muted-foreground">
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              Memeriksa status license...
+            </div>
+          </section>
+        ) : !authorized ? (
           <section className="max-w-xl mx-auto border border-border bg-card rounded p-5 md:p-6 space-y-5">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded bg-secondary flex items-center justify-center">
