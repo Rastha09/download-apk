@@ -310,15 +310,6 @@ const DonationPage = () => {
           </section>
         ) : (
           <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="text-sm text-muted-foreground font-mono">
-                {expiryText ? `Akses aktif sampai ${expiryText}` : "Akses aktif"}
-              </div>
-              <Button variant="outline" onClick={handleResetSession} className="uppercase tracking-wider font-mono">
-                <LogOut className="w-4 h-4" />
-                Keluar dari sesi key
-              </Button>
-            </div>
             <ApkList refreshTrigger={refreshTrigger} category="donation" title="Donation APK/APKS" />
           </section>
         )}
