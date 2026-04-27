@@ -238,7 +238,15 @@ const DonationPage = () => {
               </p>
             </div>
 
-            {authorized && (
+            {isAdmin ? (
+              <div className="rounded border border-border bg-secondary/40 px-4 py-3 text-sm font-mono text-muted-foreground">
+                <div className="flex items-center gap-2 text-primary font-semibold uppercase tracking-wider mb-1">
+                  <ShieldCheck className="w-4 h-4" />
+                  Admin Access
+                </div>
+                <p>Bypass license aktif</p>
+              </div>
+            ) : authorized && (
               <div className="rounded border border-border bg-secondary/40 px-4 py-3 text-sm font-mono text-muted-foreground">
                 <div className="flex items-center gap-2 text-primary font-semibold uppercase tracking-wider mb-1">
                   <ShieldCheck className="w-4 h-4" />
@@ -251,7 +259,11 @@ const DonationPage = () => {
           </div>
         </section>
 
-        {checkingSession ? (
+        {isAdmin ? (
+          <section className="space-y-4">
+            <ApkList refreshTrigger={refreshTrigger} category="donation" title="Donation APK/APKS" isAdmin />
+          </section>
+        ) : checkingSession ? (
           <section className="max-w-xl mx-auto border border-border bg-card rounded p-5 md:p-6">
             <div className="flex items-center justify-center gap-3 text-sm font-mono text-muted-foreground">
               <Loader2 className="w-5 h-5 animate-spin text-primary" />
