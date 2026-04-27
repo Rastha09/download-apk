@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { clearLicenseSession, getLicenseSession, isLicenseSessionActive, saveLicenseSession } from "@/lib/license-session";
 
 type ValidationResult = {
@@ -17,6 +18,7 @@ type ValidationResult = {
 };
 
 const DonationPage = () => {
+  const { isAdmin } = useAuth();
   const [licenseKey, setLicenseKey] = useState("");
   const [validating, setValidating] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
