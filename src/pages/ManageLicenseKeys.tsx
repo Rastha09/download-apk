@@ -32,7 +32,7 @@ const ManageLicenseKeys = () => {
   const [licenseKeys, setLicenseKeys] = useState<LicenseKeyRow[]>([]);
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [keyString, setKeyString] = useState(createRandomKey());
+  const [keyString, setKeyString] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
 
   const grouped = useMemo(() => {
@@ -117,7 +117,7 @@ const ManageLicenseKeys = () => {
       if (error) throw error;
 
       await Swal.fire({ icon: "success", title: "License key dibuat", text: "Key baru berhasil disimpan.", confirmButtonColor: "hsl(145 65% 42%)" });
-      setKeyString(createRandomKey());
+      setKeyString("");
       setExpiryDate("");
       fetchKeys();
     } catch (error) {
@@ -189,14 +189,21 @@ const ManageLicenseKeys = () => {
 
           <form onSubmit={handleCreate} className="grid grid-cols-1 lg:grid-cols-[1.4fr_0.9fr_auto] gap-3 items-end">
             <div className="space-y-2">
-              <Label htmlFor="license-key-string">License Key</Label>
+              <Label htmlFor="license-key-string">License Key (Manual / Generate)</Label>
               <div className="flex gap-2">
-                <Input id="license-key-string" value={keyString} onChange={(e) => setKeyString(e.target.value.toUpperCase())} className="font-mono uppercase tracking-wider" />
-                <Button type="button" variant="outline" onClick={handleGenerate} className="uppercase font-mono">
+                <Input
+                  id="license-key-string"
+                  value={keyString}
+                  onChange={(e) => setKeyString(e.target.value.toUpperCase())}
+                  placeholder="Ketik manual atau klik Generate"
+                  className="font-mono uppercase tracking-wider"
+                />
+                <Button type="button" variant="outline" onClick={handleGenerate} className="uppercase font-mono" title="Generate otomatis (opsional)">
                   <RefreshCw className="w-4 h-4" />
-                  Generate
+                  Auto
                 </Button>
               </div>
+              <p className="text-[10px] text-muted-foreground font-mono">Bebas format — admin bisa membuat key manual sesuai keinginan.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="license-expiry">Tanggal Expired</Label>
