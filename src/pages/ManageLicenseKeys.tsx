@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Navigate, Link } from "react-router-dom";
-import { ArrowLeft, Copy, KeyRound, Loader2, RotateCcw, ShieldCheck, Trash2, Plus, RefreshCw } from "lucide-react";
+import { ArrowLeft, Copy, KeyRound, Loader2, RotateCcw, Search, ShieldCheck, Trash2, Plus, RefreshCw, X } from "lucide-react";
 import Swal from "sweetalert2";
 import { Navbar } from "@/components/Navbar";
 import { ParticleBackground } from "@/components/ParticleBackground";
@@ -34,14 +34,32 @@ const ManageLicenseKeys = () => {
   const [saving, setSaving] = useState(false);
   const [keyString, setKeyString] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "expired" | "bound" | "unbound">("all");
 
   const grouped = useMemo(() => {
     const now = new Date().setHours(0, 0, 0, 0);
-    return licenseKeys.map((item) => ({
+    const enriched = licenseKeys.map((item) => ({
       ...item,
       expired: new Date(item.expiry_date).getTime() < now,
     }));
-  }, [licenseKeys]);
+
+    const q = searchQuery.trim().toLowerCase();
+    return enriched.filter((item) => {
+      if (q) {
+        const haystack = `${item.key_string} ${item.bound_ip ?? ""}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      switch (statusFilter) {
+        case "active": return item.is_active && !item.expired;
+        case "inactive": return !item.is_active;
+        case "expired": return item.expired;
+        case "bound": return !!item.bound_ip;
+        case "unbound": return !item.bound_ip;
+        default: return true;
+      }
+    });
+  }, [licenseKeys, searchQuery, statusFilter]);
 
   const fetchKeys = async () => {
     setFetching(true);
