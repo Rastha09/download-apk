@@ -127,7 +127,7 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
                     <span className="text-2xl font-bold text-primary font-mono">{countdown}</span>
                   </div>
                   <p className="text-sm text-muted-foreground font-mono animate-pulse">
-                    Generating link...
+                    {isDonation ? "Mempersiapkan file..." : "Generating link..."}
                   </p>
                 </div>
               ) : (
