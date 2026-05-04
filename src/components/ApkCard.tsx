@@ -519,6 +519,7 @@ export function ApkCard({
         appName={appName}
         iconUrl={iconUrl}
         isLoading={isRedirecting}
+        category={category}
         onConfirm={handleConfirmDownload}
         onCancel={() => {
           if (!isRedirecting) setShowModal(false);
