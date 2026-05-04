@@ -236,6 +236,23 @@ export function ApkCard({
     setIsRedirecting(true);
 
     try {
+      // Donation APKs: download langsung tanpa safelink/iklan
+      if (category === "donation") {
+        // Increment download count via RPC (server-side)
+        await supabase.rpc("increment_download_count", { apk_id: id });
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileName;
+        link.rel = "noopener noreferrer";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setIsRedirecting(false);
+        setShowModal(false);
+        onDownloadComplete?.();
+        return;
+      }
+
       const { data, error: fnError } = await supabase.functions.invoke("generate-safelink", {
         body: { apkId: id },
       });
