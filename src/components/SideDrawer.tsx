@@ -219,7 +219,7 @@ export function SideDrawer({ open, onClose }: SideDrawerProps) {
           </div>
           <div>
             <h4 className="font-bold text-primary mb-1">Teknologi</h4>
-            <p className="text-muted-foreground">React · TypeScript · Tailwind CSS · Lovable Cloud</p>
+            <p className="text-muted-foreground">React · TypeScript · Tailwind CSS · Cloud</p>
           </div>
           <p className="text-xs text-muted-foreground pt-2 border-t border-border">
             © 2026 DEIMOS MODS™. All rights reserved.
