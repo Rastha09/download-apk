@@ -104,7 +104,7 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
                 <div className="flex flex-col items-center gap-3 py-4">
                   <Loader2 className="w-8 h-8 text-primary animate-spin" />
                   <p className="text-sm text-muted-foreground animate-pulse font-mono">
-                    Mengarahkan ke halaman unduhan…
+                    {isDonation ? "Memulai unduhan…" : "Mengarahkan ke halaman unduhan…"}
                   </p>
                 </div>
               ) : showCountdown ? (
