@@ -246,10 +246,55 @@ const ManageLicenseKeys = () => {
             </Button>
           </div>
 
+          <div className="flex flex-col md:flex-row gap-3 p-5 border-b border-border">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari key atau IP..."
+                className="pl-9 pr-9 font-mono"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {([
+                { v: "all", label: "Semua" },
+                { v: "active", label: "Aktif" },
+                { v: "inactive", label: "Nonaktif" },
+                { v: "expired", label: "Expired" },
+                { v: "bound", label: "Terikat IP" },
+                { v: "unbound", label: "Belum Terikat" },
+              ] as const).map((f) => (
+                <Button
+                  key={f.v}
+                  type="button"
+                  variant={statusFilter === f.v ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStatusFilter(f.v)}
+                  className="uppercase font-mono text-[10px]"
+                >
+                  {f.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
           {fetching ? (
             <div className="p-10 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
           ) : grouped.length === 0 ? (
-            <div className="p-10 text-center text-muted-foreground font-mono">Belum ada license key.</div>
+            <div className="p-10 text-center text-muted-foreground font-mono">
+              {licenseKeys.length === 0 ? "Belum ada license key." : "Tidak ada hasil yang cocok."}
+            </div>
           ) : (
             <div className="overflow-x-auto">
             <Table className="min-w-[760px]">
