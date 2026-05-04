@@ -8,11 +8,13 @@ interface DownloadModalProps {
   appName: string;
   iconUrl?: string;
   isLoading: boolean;
+  category?: "free" | "donation";
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export function DownloadModal({ isOpen, appName, iconUrl, isLoading, onConfirm, onCancel }: DownloadModalProps) {
+export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = "free", onConfirm, onCancel }: DownloadModalProps) {
+  const isDonation = category === "donation";
   const [countdown, setCountdown] = useState<number | null>(null);
   const [generating, setGenerating] = useState(false);
 
