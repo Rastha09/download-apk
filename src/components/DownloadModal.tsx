@@ -8,11 +8,13 @@ interface DownloadModalProps {
   appName: string;
   iconUrl?: string;
   isLoading: boolean;
+  category?: "free" | "donation";
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export function DownloadModal({ isOpen, appName, iconUrl, isLoading, onConfirm, onCancel }: DownloadModalProps) {
+export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = "free", onConfirm, onCancel }: DownloadModalProps) {
+  const isDonation = category === "donation";
   const [countdown, setCountdown] = useState<number | null>(null);
   const [generating, setGenerating] = useState(false);
 
@@ -85,15 +87,24 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, onConfirm, 
               </h3>
 
               <p className="text-sm text-muted-foreground text-center leading-relaxed mb-6 font-mono">
-                <span className="text-primary">Unduhan sedang dipersiapkan.</span>{" "}
-                Untuk menjaga layanan tetap gratis, Anda akan melihat iklan singkat sebelum mengunduh.
+                {isDonation ? (
+                  <>
+                    <span className="text-primary">Terima kasih atas dukungan Anda.</span>{" "}
+                    File akan diunduh langsung tanpa iklan.
+                  </>
+                ) : (
+                  <>
+                    <span className="text-primary">Unduhan sedang dipersiapkan.</span>{" "}
+                    Untuk menjaga layanan tetap gratis, Anda akan melihat iklan singkat sebelum mengunduh.
+                  </>
+                )}
               </p>
 
               {isLoading ? (
                 <div className="flex flex-col items-center gap-3 py-4">
                   <Loader2 className="w-8 h-8 text-primary animate-spin" />
                   <p className="text-sm text-muted-foreground animate-pulse font-mono">
-                    Mengarahkan ke halaman unduhan…
+                    {isDonation ? "Memulai unduhan…" : "Mengarahkan ke halaman unduhan…"}
                   </p>
                 </div>
               ) : showCountdown ? (
@@ -116,7 +127,7 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, onConfirm, 
                     <span className="text-2xl font-bold text-primary font-mono">{countdown}</span>
                   </div>
                   <p className="text-sm text-muted-foreground font-mono animate-pulse">
-                    Generating link...
+                    {isDonation ? "Mempersiapkan file..." : "Generating link..."}
                   </p>
                 </div>
               ) : (
