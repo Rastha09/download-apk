@@ -71,13 +71,21 @@ Deno.serve(async (req) => {
 
     const { data: apk, error: dbError } = await supabase
       .from("apk_uploads")
-      .select("download_url")
+      .select("download_url, category")
       .eq("id", apkId)
       .single();
 
     if (dbError || !apk) {
       return new Response(JSON.stringify({ error: "APK not found" }), {
         status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Donation APKs must go through get-donation-download with license validation
+    if (apk.category !== "free") {
+      return new Response(JSON.stringify({ error: "Not allowed for this APK" }), {
+        status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
