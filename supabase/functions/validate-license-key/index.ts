@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const keyPattern = /^[A-Z0-9-]{8,40}$/;
+const keyPattern = /^[A-Z0-9-]{1,64}$/;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
