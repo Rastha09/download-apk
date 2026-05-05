@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("list-donation-apks error", error);
     return new Response(
-      JSON.stringify({ error: (error as Error).message || "Internal server error" }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
