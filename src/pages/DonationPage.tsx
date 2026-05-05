@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { Navbar } from "@/components/Navbar";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { ApkList } from "@/components/ApkList";
+import { DonationApkList } from "@/components/DonationApkList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -324,7 +325,7 @@ const DonationPage = () => {
           </section>
         ) : (
           <section className="space-y-4">
-            <ApkList refreshTrigger={refreshTrigger} category="donation" title="Donation APK/APKS" />
+            <DonationApkList refreshTrigger={refreshTrigger} />
           </section>
         )}
       </main>

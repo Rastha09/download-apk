@@ -236,13 +236,20 @@ export function ApkCard({
     setIsRedirecting(true);
 
     try {
-      // Donation APKs: download langsung tanpa safelink/iklan
+      // Donation APKs: server-side license check, then direct download
       if (category === "donation") {
-        // Increment download count via RPC (server-side)
-        await supabase.rpc("increment_download_count", { apk_id: id });
+        const { getLicenseSession } = await import("@/lib/license-session");
+        const session = getLicenseSession();
+        const { data: dl, error: dlError } = await supabase.functions.invoke(
+          "get-donation-download",
+          { body: { apkId: id, key: session?.key ?? "" } }
+        );
+        if (dlError || !dl?.downloadUrl) {
+          throw new Error(dl?.error || dlError?.message || "Gagal menyiapkan download");
+        }
         const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.download = fileName;
+        link.href = dl.downloadUrl;
+        link.download = dl.fileName || fileName;
         link.rel = "noopener noreferrer";
         document.body.appendChild(link);
         link.click();
