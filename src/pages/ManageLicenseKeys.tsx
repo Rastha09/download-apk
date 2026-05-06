@@ -167,12 +167,36 @@ const ManageLicenseKeys = () => {
   };
 
   const handleResetIp = async (row: LicenseKeyRow) => {
-    const { error } = await supabase.from("license_keys").update({ bound_ip: null }).eq("id", row.id);
-    if (error) {
-      Swal.fire({ icon: "error", title: "Gagal reset IP", text: error.message, confirmButtonColor: "hsl(145 65% 42%)" });
-      return;
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) {
+        Swal.fire({ icon: "error", title: "Gagal reset IP", text: "Sesi tidak valid", confirmButtonColor: "hsl(145 65% 42%)" });
+        return;
+      }
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-license-ip`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+            apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ key_id: row.id }),
+        }
+      );
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `HTTP ${res.status}`);
+      }
+
+      fetchKeys();
+    } catch (error) {
+      Swal.fire({ icon: "error", title: "Gagal reset IP", text: (error as Error).message, confirmButtonColor: "hsl(145 65% 42%)" });
     }
-    fetchKeys();
   };
 
   const handleToggleStatus = async (row: LicenseKeyRow) => {
