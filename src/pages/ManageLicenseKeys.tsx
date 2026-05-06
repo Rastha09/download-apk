@@ -28,7 +28,7 @@ const createRandomKey = () => {
 };
 
 const ManageLicenseKeys = () => {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, isSuperAdmin, loading } = useAuth();
   const [licenseKeys, setLicenseKeys] = useState<LicenseKeyRow[]>([]);
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
