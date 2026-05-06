@@ -360,14 +360,25 @@ const ManageLicenseKeys = () => {
                         {row.expired && <span className="inline-flex rounded px-2 py-1 text-[10px] font-mono uppercase bg-accent/10 text-accent">Expired</span>}
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-xs">{row.bound_ip ?? "Belum terikat"}</TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {(row.bound_ips?.length ?? 0) === 0 ? (
+                        "Belum terikat"
+                      ) : (
+                        <div className="flex flex-col gap-0.5">
+                          {row.bound_ips!.map((ip) => (
+                            <span key={ip}>{ip}</span>
+                          ))}
+                          <span className="text-[10px] text-muted-foreground">{row.bound_ips!.length}/3 slot</span>
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-2 flex-wrap">
                         <Button variant="outline" size="sm" onClick={() => handleToggleStatus(row)} className="font-mono uppercase">
                           {row.is_active ? "Nonaktifkan" : "Aktifkan"}
                         </Button>
                         {isSuperAdmin && (
-                          <Button variant="outline" size="sm" onClick={() => handleResetIp(row)} className="font-mono uppercase" disabled={!row.bound_ip}>
+                          <Button variant="outline" size="sm" onClick={() => handleResetIp(row)} className="font-mono uppercase" disabled={(row.bound_ips?.length ?? 0) === 0}>
                             <RotateCcw className="w-4 h-4" />
                             Reset IP
                           </Button>
