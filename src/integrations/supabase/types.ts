@@ -96,7 +96,7 @@ export type Database = {
       }
       license_keys: {
         Row: {
-          bound_ip: unknown
+          bound_ips: unknown[]
           created_at: string
           created_by: string | null
           expiry_date: string
@@ -105,7 +105,7 @@ export type Database = {
           key_string: string
         }
         Insert: {
-          bound_ip?: unknown
+          bound_ips?: unknown[]
           created_at?: string
           created_by?: string | null
           expiry_date: string
@@ -114,7 +114,7 @@ export type Database = {
           key_string: string
         }
         Update: {
-          bound_ip?: unknown
+          bound_ips?: unknown[]
           created_at?: string
           created_by?: string | null
           expiry_date?: string
