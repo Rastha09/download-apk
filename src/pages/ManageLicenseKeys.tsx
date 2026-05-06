@@ -366,10 +366,12 @@ const ManageLicenseKeys = () => {
                         <Button variant="outline" size="sm" onClick={() => handleToggleStatus(row)} className="font-mono uppercase">
                           {row.is_active ? "Nonaktifkan" : "Aktifkan"}
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleResetIp(row)} className="font-mono uppercase" disabled={!row.bound_ip}>
-                          <RotateCcw className="w-4 h-4" />
-                          Reset IP
-                        </Button>
+                        {isSuperAdmin && (
+                          <Button variant="outline" size="sm" onClick={() => handleResetIp(row)} className="font-mono uppercase" disabled={!row.bound_ip}>
+                            <RotateCcw className="w-4 h-4" />
+                            Reset IP
+                          </Button>
+                        )}
                         <Button variant="outline" size="sm" onClick={() => handleDelete(row)} className="text-destructive hover:text-destructive">
                           <Trash2 className="w-4 h-4" />
                         </Button>
