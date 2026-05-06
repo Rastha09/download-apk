@@ -16,7 +16,7 @@ interface LicenseKeyRow {
   key_string: string;
   expiry_date: string;
   created_at: string;
-  bound_ip: string | null;
+  bound_ips: string[] | null;
   is_active: boolean;
   created_by: string | null;
 }
@@ -47,15 +47,15 @@ const ManageLicenseKeys = () => {
     const q = searchQuery.trim().toLowerCase();
     return enriched.filter((item) => {
       if (q) {
-        const haystack = `${item.key_string} ${item.bound_ip ?? ""}`.toLowerCase();
+        const haystack = `${item.key_string} ${(item.bound_ips ?? []).join(" ")}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       switch (statusFilter) {
         case "active": return item.is_active && !item.expired;
         case "inactive": return !item.is_active;
         case "expired": return item.expired;
-        case "bound": return !!item.bound_ip;
-        case "unbound": return !item.bound_ip;
+        case "bound": return (item.bound_ips?.length ?? 0) > 0;
+        case "unbound": return (item.bound_ips?.length ?? 0) === 0;
         default: return true;
       }
     });
@@ -66,7 +66,7 @@ const ManageLicenseKeys = () => {
     try {
       const { data, error } = await supabase
         .from("license_keys")
-        .select("id, key_string, expiry_date, created_at, bound_ip, is_active, created_by")
+        .select("id, key_string, expiry_date, created_at, bound_ips, is_active, created_by")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setLicenseKeys((data ?? []) as LicenseKeyRow[]);
@@ -360,14 +360,25 @@ const ManageLicenseKeys = () => {
                         {row.expired && <span className="inline-flex rounded px-2 py-1 text-[10px] font-mono uppercase bg-accent/10 text-accent">Expired</span>}
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-xs">{row.bound_ip ?? "Belum terikat"}</TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {(row.bound_ips?.length ?? 0) === 0 ? (
+                        "Belum terikat"
+                      ) : (
+                        <div className="flex flex-col gap-0.5">
+                          {row.bound_ips!.map((ip) => (
+                            <span key={ip}>{ip}</span>
+                          ))}
+                          <span className="text-[10px] text-muted-foreground">{row.bound_ips!.length}/3 slot</span>
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-2 flex-wrap">
                         <Button variant="outline" size="sm" onClick={() => handleToggleStatus(row)} className="font-mono uppercase">
                           {row.is_active ? "Nonaktifkan" : "Aktifkan"}
                         </Button>
                         {isSuperAdmin && (
-                          <Button variant="outline" size="sm" onClick={() => handleResetIp(row)} className="font-mono uppercase" disabled={!row.bound_ip}>
+                          <Button variant="outline" size="sm" onClick={() => handleResetIp(row)} className="font-mono uppercase" disabled={(row.bound_ips?.length ?? 0) === 0}>
                             <RotateCcw className="w-4 h-4" />
                             Reset IP
                           </Button>
