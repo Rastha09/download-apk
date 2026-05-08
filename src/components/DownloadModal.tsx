@@ -42,14 +42,9 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
   }, [countdown, generating, onConfirm]);
 
   const handleClickDownload = useCallback(() => {
-    if (isDonation) {
-      setGenerating(true);
-      setCountdown(5);
-    } else {
-      // Free APKs: skip countdown, download langsung
-      onConfirm();
-    }
-  }, [isDonation, onConfirm]);
+    setGenerating(true);
+    setCountdown(5);
+  }, []);
 
   const showCountdown = generating && countdown !== null && countdown > 0;
 
