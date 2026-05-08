@@ -42,14 +42,9 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
   }, [countdown, generating, onConfirm]);
 
   const handleClickDownload = useCallback(() => {
-    if (isDonation) {
-      setGenerating(true);
-      setCountdown(5);
-    } else {
-      // Free APKs: skip countdown, download langsung
-      onConfirm();
-    }
-  }, [isDonation, onConfirm]);
+    setGenerating(true);
+    setCountdown(5);
+  }, []);
 
   const showCountdown = generating && countdown !== null && countdown > 0;
 
@@ -132,7 +127,7 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
                     <span className="text-2xl font-bold text-primary font-mono">{countdown}</span>
                   </div>
                   <p className="text-sm text-muted-foreground font-mono animate-pulse">
-                    {isDonation ? "Mempersiapkan file..." : "Generating link..."}
+                    Mempersiapkan unduhan…
                   </p>
                 </div>
               ) : (
