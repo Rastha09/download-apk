@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const keyPattern = /^[A-Z0-9-]{1,64}$/;
+const devicePattern = /^[a-zA-Z0-9-]{8,128}$/;
 
 // IP-based rate limiter to prevent brute-force key enumeration
 const rateLimit = new Map<string, { count: number; resetAt: number }>();
@@ -46,9 +47,17 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => null);
     const key = String(body?.key ?? "").trim().toUpperCase();
+    const deviceId = String(body?.deviceId ?? "").trim();
 
     if (!keyPattern.test(key)) {
       return new Response(JSON.stringify({ error: "Format license key tidak valid" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!devicePattern.test(deviceId)) {
+      return new Response(JSON.stringify({ error: "Device ID tidak valid" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -60,7 +69,7 @@ Deno.serve(async (req) => {
 
     const { data, error } = await admin.rpc("validate_license_key", {
       _key: key,
-      _client_ip: clientIp,
+      _device_id: deviceId,
     });
 
     if (error) {

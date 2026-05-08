@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const keyPattern = /^[A-Z0-9-]{1,64}$/;
+const devicePattern = /^[a-zA-Z0-9-]{8,128}$/;
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // rate limiter
@@ -76,15 +77,22 @@ Deno.serve(async (req) => {
 
     if (!isAdmin) {
       const key = String(body?.key ?? "").trim().toUpperCase();
+      const deviceId = String(body?.deviceId ?? "").trim();
       if (!keyPattern.test(key)) {
         return new Response(JSON.stringify({ error: "License key tidak valid" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      if (!devicePattern.test(deviceId)) {
+        return new Response(JSON.stringify({ error: "Device ID tidak valid" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const { data: validationData, error: validationError } = await admin.rpc(
         "validate_license_key",
-        { _key: key, _client_ip: clientIp }
+        { _key: key, _device_id: deviceId }
       );
       if (validationError) throw validationError;
       const validation = Array.isArray(validationData) ? validationData[0] : validationData;
