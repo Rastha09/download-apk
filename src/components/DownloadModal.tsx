@@ -42,9 +42,14 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
   }, [countdown, generating, onConfirm]);
 
   const handleClickDownload = useCallback(() => {
-    setGenerating(true);
-    setCountdown(5);
-  }, []);
+    if (isDonation) {
+      setGenerating(true);
+      setCountdown(5);
+    } else {
+      // Free APKs: skip countdown, download langsung
+      onConfirm();
+    }
+  }, [isDonation, onConfirm]);
 
   const showCountdown = generating && countdown !== null && countdown > 0;
 
@@ -94,8 +99,8 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
                   </>
                 ) : (
                   <>
-                    <span className="text-primary">Unduhan sedang dipersiapkan.</span>{" "}
-                    Untuk menjaga layanan tetap gratis, Anda akan melihat iklan singkat sebelum mengunduh.
+                    <span className="text-primary">Unduhan siap!</span>{" "}
+                    File akan diunduh langsung tanpa iklan.
                   </>
                 )}
               </p>

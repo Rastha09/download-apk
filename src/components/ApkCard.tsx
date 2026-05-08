@@ -273,7 +273,7 @@ export function ApkCard({
       setShowModal(false);
       onDownloadComplete?.();
     } catch (err: any) {
-      console.error("Safelink generation error:", err);
+      console.error("Download error:", err);
       setIsRedirecting(false);
       setShowModal(false);
       Swal.fire({
