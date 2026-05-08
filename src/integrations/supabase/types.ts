@@ -96,6 +96,7 @@ export type Database = {
       }
       license_keys: {
         Row: {
+          bound_devices: string[]
           bound_ips: unknown[]
           created_at: string
           created_by: string | null
@@ -105,6 +106,7 @@ export type Database = {
           key_string: string
         }
         Insert: {
+          bound_devices?: string[]
           bound_ips?: unknown[]
           created_at?: string
           created_by?: string | null
@@ -114,6 +116,7 @@ export type Database = {
           key_string: string
         }
         Update: {
+          bound_devices?: string[]
           bound_ips?: unknown[]
           created_at?: string
           created_by?: string | null
@@ -162,9 +165,9 @@ export type Database = {
       }
       increment_download_count: { Args: { apk_id: string }; Returns: undefined }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
-      reset_license_ip: { Args: { _key_id: string }; Returns: boolean }
+      reset_license_devices: { Args: { _key_id: string }; Returns: boolean }
       validate_license_key: {
-        Args: { _client_ip: string; _key: string }
+        Args: { _device_id: string; _key: string }
         Returns: {
           expiry_date: string
           is_valid: boolean
