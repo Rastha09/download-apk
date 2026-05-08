@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { clearLicenseSession, getLicenseSession, isLicenseSessionActive, saveLicenseSession } from "@/lib/license-session";
+import { getDeviceId } from "@/lib/device-id";
 
 type ValidationResult = {
   is_valid: boolean;
@@ -30,7 +31,7 @@ const DonationPage = () => {
 
   const invokeLicenseValidation = useCallback(async (key: string) => {
     const { data, error } = await supabase.functions.invoke("validate-license-key", {
-      body: { key },
+      body: { key, deviceId: getDeviceId() },
     });
 
     if (error) {
@@ -235,7 +236,7 @@ const DonationPage = () => {
               </div>
               <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-wider text-foreground">APK Donasi</h1>
               <p className="text-sm text-muted-foreground font-mono max-w-xl">
-                Masukkan license key aktif untuk membuka daftar APK donasi. Key akan terikat ke IP saat pertama kali digunakan.
+                Masukkan license key aktif untuk membuka daftar APK donasi. Key akan terikat ke perangkat (browser) saat pertama kali digunakan, jadi aman digunakan saat berganti WiFi atau data seluler.
               </p>
             </div>
 
@@ -304,7 +305,7 @@ const DonationPage = () => {
                 </div>
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 mt-0.5 text-accent" />
-                  <p>Jika key dipakai dari IP lain, akses akan ditolak otomatis.</p>
+                  <p>Maks. 3 perangkat per key. Jika dipakai di perangkat baru melebihi batas, akses akan ditolak.</p>
                 </div>
               </div>
 

@@ -16,7 +16,7 @@ interface LicenseKeyRow {
   key_string: string;
   expiry_date: string;
   created_at: string;
-  bound_ips: string[] | null;
+  bound_devices: string[] | null;
   is_active: boolean;
   created_by: string | null;
 }
@@ -47,15 +47,15 @@ const ManageLicenseKeys = () => {
     const q = searchQuery.trim().toLowerCase();
     return enriched.filter((item) => {
       if (q) {
-        const haystack = `${item.key_string} ${(item.bound_ips ?? []).join(" ")}`.toLowerCase();
+        const haystack = `${item.key_string} ${(item.bound_devices ?? []).join(" ")}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       switch (statusFilter) {
         case "active": return item.is_active && !item.expired;
         case "inactive": return !item.is_active;
         case "expired": return item.expired;
-        case "bound": return (item.bound_ips?.length ?? 0) > 0;
-        case "unbound": return (item.bound_ips?.length ?? 0) === 0;
+        case "bound": return (item.bound_devices?.length ?? 0) > 0;
+        case "unbound": return (item.bound_devices?.length ?? 0) === 0;
         default: return true;
       }
     });
@@ -66,7 +66,7 @@ const ManageLicenseKeys = () => {
     try {
       const { data, error } = await supabase
         .from("license_keys")
-        .select("id, key_string, expiry_date, created_at, bound_ips, is_active, created_by")
+        .select("id, key_string, expiry_date, created_at, bound_devices, is_active, created_by")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setLicenseKeys((data ?? []) as LicenseKeyRow[]);
@@ -171,7 +171,7 @@ const ManageLicenseKeys = () => {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
       if (!accessToken) {
-        Swal.fire({ icon: "error", title: "Gagal reset IP", text: "Sesi tidak valid", confirmButtonColor: "hsl(145 65% 42%)" });
+        Swal.fire({ icon: "error", title: "Gagal reset perangkat", text: "Sesi tidak valid", confirmButtonColor: "hsl(145 65% 42%)" });
         return;
       }
 
@@ -195,7 +195,7 @@ const ManageLicenseKeys = () => {
 
       fetchKeys();
     } catch (error) {
-      Swal.fire({ icon: "error", title: "Gagal reset IP", text: (error as Error).message, confirmButtonColor: "hsl(145 65% 42%)" });
+      Swal.fire({ icon: "error", title: "Gagal reset perangkat", text: (error as Error).message, confirmButtonColor: "hsl(145 65% 42%)" });
     }
   };
 
@@ -262,7 +262,7 @@ const ManageLicenseKeys = () => {
           <div className="flex items-center justify-between gap-3 p-5 border-b border-border flex-wrap">
             <div>
               <h2 className="text-sm font-bold uppercase tracking-wider text-primary font-mono">Daftar License Keys</h2>
-              <p className="text-xs text-muted-foreground font-mono mt-1">Aktif, expired, dan status binding IP.</p>
+              <p className="text-xs text-muted-foreground font-mono mt-1">Aktif, expired, dan status binding perangkat.</p>
             </div>
             <Button variant="outline" onClick={fetchKeys} disabled={fetching} className="uppercase tracking-wider font-mono">
               <RefreshCw className={`w-4 h-4 ${fetching ? "animate-spin" : ""}`} />
@@ -276,7 +276,7 @@ const ManageLicenseKeys = () => {
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari key atau IP..."
+                placeholder="Cari key atau device..."
                 className="pl-9 pr-9 font-mono"
               />
               {searchQuery && (
@@ -296,7 +296,7 @@ const ManageLicenseKeys = () => {
                 { v: "active", label: "Aktif" },
                 { v: "inactive", label: "Nonaktif" },
                 { v: "expired", label: "Expired" },
-                { v: "bound", label: "Terikat IP" },
+                { v: "bound", label: "Terikat Device" },
                 { v: "unbound", label: "Belum Terikat" },
               ] as const).map((f) => (
                 <Button
@@ -327,7 +327,7 @@ const ManageLicenseKeys = () => {
                   <TableHead>Key</TableHead>
                   <TableHead>Expired</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Bound IP</TableHead>
+                  <TableHead>Bound Devices</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
@@ -361,14 +361,14 @@ const ManageLicenseKeys = () => {
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {(row.bound_ips?.length ?? 0) === 0 ? (
+                      {(row.bound_devices?.length ?? 0) === 0 ? (
                         "Belum terikat"
                       ) : (
-                        <div className="flex flex-col gap-0.5">
-                          {row.bound_ips!.map((ip) => (
-                            <span key={ip}>{ip}</span>
+                        <div className="flex flex-col gap-0.5 max-w-[260px]">
+                          {row.bound_devices!.map((d) => (
+                            <span key={d} className="truncate" title={d}>{d}</span>
                           ))}
-                          <span className="text-[10px] text-muted-foreground">{row.bound_ips!.length}/3 slot</span>
+                          <span className="text-[10px] text-muted-foreground">{row.bound_devices!.length}/3 slot</span>
                         </div>
                       )}
                     </TableCell>
@@ -378,9 +378,9 @@ const ManageLicenseKeys = () => {
                           {row.is_active ? "Nonaktifkan" : "Aktifkan"}
                         </Button>
                         {isSuperAdmin && (
-                          <Button variant="outline" size="sm" onClick={() => handleResetIp(row)} className="font-mono uppercase" disabled={(row.bound_ips?.length ?? 0) === 0}>
+                          <Button variant="outline" size="sm" onClick={() => handleResetIp(row)} className="font-mono uppercase" disabled={(row.bound_devices?.length ?? 0) === 0}>
                             <RotateCcw className="w-4 h-4" />
-                            Reset IP
+                            Reset Device
                           </Button>
                         )}
                         <Button variant="outline" size="sm" onClick={() => handleDelete(row)} className="text-destructive hover:text-destructive">

@@ -239,10 +239,11 @@ export function ApkCard({
       // Donation APKs: server-side license check, then direct download
       if (category === "donation") {
         const { getLicenseSession } = await import("@/lib/license-session");
+        const { getDeviceId } = await import("@/lib/device-id");
         const session = getLicenseSession();
         const { data: dl, error: dlError } = await supabase.functions.invoke(
           "get-donation-download",
-          { body: { apkId: id, key: session?.key ?? "" } }
+          { body: { apkId: id, key: session?.key ?? "", deviceId: getDeviceId() } }
         );
         if (dlError || !dl?.downloadUrl) {
           throw new Error(dl?.error || dlError?.message || "Gagal menyiapkan download");

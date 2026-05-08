@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
 
     const { error: updateError } = await adminClient
       .from("license_keys")
-      .update({ bound_ip: null })
+      .update({ bound_devices: [], bound_ips: [] })
       .eq("id", keyId);
 
     if (updateError) {
