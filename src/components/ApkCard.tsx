@@ -260,17 +260,20 @@ export function ApkCard({
         return;
       }
 
-      const { data, error: fnError } = await supabase.functions.invoke("generate-safelink", {
-        body: { apkId: id },
-      });
-
-      if (fnError || !data?.shortlink) {
-        throw new Error(data?.error || "Gagal generate link");
-      }
-
-      window.location.href = data.shortlink;
+      // Free APKs: direct download tanpa safelinku/iklan
+      await supabase.rpc("increment_download_count", { apk_id: id });
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = fileName;
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setIsRedirecting(false);
+      setShowModal(false);
+      onDownloadComplete?.();
     } catch (err: any) {
-      console.error("Safelink generation error:", err);
+      console.error("Download error:", err);
       setIsRedirecting(false);
       setShowModal(false);
       Swal.fire({
