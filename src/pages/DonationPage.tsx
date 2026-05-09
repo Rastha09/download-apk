@@ -30,8 +30,9 @@ const DonationPage = () => {
   const revalidatingRef = useRef(false);
 
   const invokeLicenseValidation = useCallback(async (key: string) => {
+    const fingerprint = await getDeviceFingerprint();
     const { data, error } = await supabase.functions.invoke("validate-license-key", {
-      body: { key, deviceId: getDeviceId() },
+      body: { key, deviceId: getDeviceId(), fingerprint },
     });
 
     if (error) {
