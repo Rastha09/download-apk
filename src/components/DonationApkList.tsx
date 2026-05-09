@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { getLicenseSession } from "@/lib/license-session";
+import { getDeviceId } from "@/lib/device-id";
 
 interface DonationApk {
   id: string;
@@ -35,7 +36,7 @@ export function DonationApkList({ refreshTrigger, isAdmin = false }: DonationApk
     try {
       const session = getLicenseSession();
       const { data, error } = await supabase.functions.invoke("list-donation-apks", {
-        body: { key: session?.key ?? "" },
+        body: { key: session?.key ?? "", deviceId: getDeviceId() },
       });
       if (error) throw error;
       setApks((data?.apks as DonationApk[]) ?? []);
