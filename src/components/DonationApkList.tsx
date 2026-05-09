@@ -35,8 +35,9 @@ export function DonationApkList({ refreshTrigger, isAdmin = false }: DonationApk
     setLoading(true);
     try {
       const session = getLicenseSession();
+      const fingerprint = await getDeviceFingerprint();
       const { data, error } = await supabase.functions.invoke("list-donation-apks", {
-        body: { key: session?.key ?? "", deviceId: getDeviceId() },
+        body: { key: session?.key ?? "", deviceId: getDeviceId(), fingerprint },
       });
       if (error) throw error;
       setApks((data?.apks as DonationApk[]) ?? []);
