@@ -48,6 +48,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => null);
     const key = String(body?.key ?? "").trim().toUpperCase();
     const deviceId = String(body?.deviceId ?? "").trim();
+    const fingerprint = String(body?.fingerprint ?? "").trim();
 
     if (!keyPattern.test(key)) {
       return new Response(JSON.stringify({ error: "Format license key tidak valid" }), {
@@ -63,6 +64,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (!devicePattern.test(fingerprint)) {
+      return new Response(JSON.stringify({ error: "Fingerprint perangkat tidak valid" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const admin = createClient(supabaseUrl, serviceRoleKey);
@@ -70,6 +78,7 @@ Deno.serve(async (req) => {
     const { data, error } = await admin.rpc("validate_license_key", {
       _key: key,
       _device_id: deviceId,
+      _fingerprint: fingerprint,
     });
 
     if (error) {

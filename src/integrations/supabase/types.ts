@@ -97,6 +97,7 @@ export type Database = {
       license_keys: {
         Row: {
           bound_devices: string[]
+          bound_fingerprints: string[]
           bound_ips: unknown[]
           created_at: string
           created_by: string | null
@@ -107,6 +108,7 @@ export type Database = {
         }
         Insert: {
           bound_devices?: string[]
+          bound_fingerprints?: string[]
           bound_ips?: unknown[]
           created_at?: string
           created_by?: string | null
@@ -117,6 +119,7 @@ export type Database = {
         }
         Update: {
           bound_devices?: string[]
+          bound_fingerprints?: string[]
           bound_ips?: unknown[]
           created_at?: string
           created_by?: string | null
@@ -166,14 +169,23 @@ export type Database = {
       increment_download_count: { Args: { apk_id: string }; Returns: undefined }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       reset_license_devices: { Args: { _key_id: string }; Returns: boolean }
-      validate_license_key: {
-        Args: { _device_id: string; _key: string }
-        Returns: {
-          expiry_date: string
-          is_valid: boolean
-          message: string
-        }[]
-      }
+      validate_license_key:
+        | {
+            Args: { _device_id: string; _key: string }
+            Returns: {
+              expiry_date: string
+              is_valid: boolean
+              message: string
+            }[]
+          }
+        | {
+            Args: { _device_id: string; _fingerprint?: string; _key: string }
+            Returns: {
+              expiry_date: string
+              is_valid: boolean
+              message: string
+            }[]
+          }
     }
     Enums: {
       apk_category: "free" | "donation"

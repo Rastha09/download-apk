@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { clearLicenseSession, getLicenseSession, isLicenseSessionActive, saveLicenseSession } from "@/lib/license-session";
-import { getDeviceId } from "@/lib/device-id";
+import { getDeviceFingerprint, getDeviceId } from "@/lib/device-id";
 
 type ValidationResult = {
   is_valid: boolean;
@@ -30,8 +30,9 @@ const DonationPage = () => {
   const revalidatingRef = useRef(false);
 
   const invokeLicenseValidation = useCallback(async (key: string) => {
+    const fingerprint = await getDeviceFingerprint();
     const { data, error } = await supabase.functions.invoke("validate-license-key", {
-      body: { key, deviceId: getDeviceId() },
+      body: { key, deviceId: getDeviceId(), fingerprint },
     });
 
     if (error) {
@@ -305,7 +306,7 @@ const DonationPage = () => {
                 </div>
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 mt-0.5 text-accent" />
-                  <p>Maks. 5 browser per key (mis. Chrome, Telegram, Google App). Jika dipakai di browser baru melebihi batas, hubungi admin untuk reset.</p>
+                  <p>1 key hanya untuk 1 perangkat. Browser berbeda di HP yang sama (Chrome, Telegram, Google App) tetap diizinkan. Jika dipakai di HP lain, akses ditolak — hubungi admin untuk reset.</p>
                 </div>
               </div>
 
