@@ -305,7 +305,7 @@ const DonationPage = () => {
                 </div>
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 mt-0.5 text-accent" />
-                  <p>Maks. 3 perangkat per key. Jika dipakai di perangkat baru melebihi batas, akses akan ditolak.</p>
+                  <p>Maks. 5 browser per key (mis. Chrome, Telegram, Google App). Jika dipakai di browser baru melebihi batas, hubungi admin untuk reset.</p>
                 </div>
               </div>
 
