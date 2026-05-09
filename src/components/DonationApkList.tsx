@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { getLicenseSession } from "@/lib/license-session";
+import { getDeviceId } from "@/lib/device-id";
 
 interface DonationApk {
   id: string;
