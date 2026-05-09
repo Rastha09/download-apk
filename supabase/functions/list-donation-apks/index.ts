@@ -68,6 +68,7 @@ Deno.serve(async (req) => {
       const body = await req.json().catch(() => null);
       const key = String(body?.key ?? "").trim().toUpperCase();
       const deviceId = String(body?.deviceId ?? "").trim();
+      const fingerprint = String(body?.fingerprint ?? "").trim();
 
       if (!keyPattern.test(key)) {
         return new Response(JSON.stringify({ error: "License key tidak valid" }), {
@@ -83,9 +84,16 @@ Deno.serve(async (req) => {
         });
       }
 
+      if (!/^[a-zA-Z0-9-]{8,128}$/.test(fingerprint)) {
+        return new Response(JSON.stringify({ error: "Fingerprint perangkat tidak valid" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const { data: validationData, error: validationError } = await admin.rpc(
         "validate_license_key",
-        { _key: key, _device_id: deviceId }
+        { _key: key, _device_id: deviceId, _fingerprint: fingerprint }
       );
       if (validationError) throw validationError;
       const validation = Array.isArray(validationData) ? validationData[0] : validationData;
