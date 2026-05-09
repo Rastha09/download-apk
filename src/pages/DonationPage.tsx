@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { clearLicenseSession, getLicenseSession, isLicenseSessionActive, saveLicenseSession } from "@/lib/license-session";
-import { getDeviceId } from "@/lib/device-id";
+import { getDeviceFingerprint, getDeviceId } from "@/lib/device-id";
 
 type ValidationResult = {
   is_valid: boolean;
