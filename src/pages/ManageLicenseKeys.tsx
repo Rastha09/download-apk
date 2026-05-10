@@ -17,6 +17,7 @@ interface LicenseKeyRow {
   expiry_date: string;
   created_at: string;
   bound_devices: string[] | null;
+  bound_fingerprints: string[] | null;
   is_active: boolean;
   created_by: string | null;
 }
@@ -66,7 +67,7 @@ const ManageLicenseKeys = () => {
     try {
       const { data, error } = await supabase
         .from("license_keys")
-        .select("id, key_string, expiry_date, created_at, bound_devices, is_active, created_by")
+        .select("id, key_string, expiry_date, created_at, bound_devices, bound_fingerprints, is_active, created_by")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setLicenseKeys((data ?? []) as LicenseKeyRow[]);
@@ -368,7 +369,7 @@ const ManageLicenseKeys = () => {
                           {row.bound_devices!.map((d) => (
                             <span key={d} className="truncate" title={d}>{d}</span>
                           ))}
-                          <span className="text-[10px] text-muted-foreground">{row.bound_devices!.length}/5 slot</span>
+                          <span className="text-[10px] text-muted-foreground">{(row.bound_fingerprints?.length ?? 0)}/3 perangkat · {row.bound_devices!.length} browser</span>
                         </div>
                       )}
                     </TableCell>
