@@ -17,6 +17,7 @@ interface LicenseKeyRow {
   expiry_date: string;
   created_at: string;
   bound_devices: string[] | null;
+  bound_fingerprints: string[] | null;
   is_active: boolean;
   created_by: string | null;
 }
