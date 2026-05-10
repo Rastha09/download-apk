@@ -32,20 +32,18 @@ let cachedFingerprint: string | null = null;
 export async function getDeviceFingerprint(): Promise<string> {
   if (cachedFingerprint) return cachedFingerprint;
 
-  const nav = navigator as Navigator & { deviceMemory?: number; userAgentData?: { platform?: string } };
+  const nav = navigator as Navigator & { userAgentData?: { platform?: string } };
   const screenObj = window.screen;
 
+  // Loose fingerprint: only the most stable signals shared across browsers/webviews on the same phone.
+  // Excludes devicePixelRatio, deviceMemory, hardwareConcurrency, maxTouchPoints, languages list,
+  // and userAgent platform — these often differ between Chrome / Telegram WebView / Google App.
   const parts = [
     nav.userAgentData?.platform ?? nav.platform ?? "",
-    `${screenObj.width}x${screenObj.height}x${screenObj.colorDepth}`,
-    String(window.devicePixelRatio ?? ""),
+    `${screenObj.width}x${screenObj.height}`,
     Intl.DateTimeFormat().resolvedOptions().timeZone ?? "",
     String(new Date().getTimezoneOffset()),
-    String(nav.hardwareConcurrency ?? ""),
-    String(nav.deviceMemory ?? ""),
-    nav.language ?? "",
-    (nav.languages ?? []).join(","),
-    String(navigator.maxTouchPoints ?? ""),
+    (nav.language ?? "").split("-")[0],
   ];
 
   const data = new TextEncoder().encode(parts.join("|"));
