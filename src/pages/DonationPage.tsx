@@ -306,7 +306,7 @@ const DonationPage = () => {
                 </div>
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 mt-0.5 text-accent" />
-                  <p>1 key hanya untuk 1 perangkat. Browser berbeda di HP yang sama (Chrome, Telegram, Google App) tetap diizinkan. Jika dipakai di HP lain, akses ditolak — hubungi admin untuk reset.</p>
+                  <p>Maks. 3 perangkat per key. Browser berbeda di HP yang sama (Chrome, Telegram, Google App) tidak dihitung sebagai perangkat baru. Jika melebihi batas, hubungi admin untuk reset.</p>
                 </div>
               </div>
 
