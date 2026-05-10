@@ -368,7 +368,7 @@ const ManageLicenseKeys = () => {
                           {row.bound_devices!.map((d) => (
                             <span key={d} className="truncate" title={d}>{d}</span>
                           ))}
-                          <span className="text-[10px] text-muted-foreground">{row.bound_devices!.length}/5 slot</span>
+                          <span className="text-[10px] text-muted-foreground">{(row.bound_fingerprints?.length ?? 0)}/3 perangkat · {row.bound_devices!.length} browser</span>
                         </div>
                       )}
                     </TableCell>
