@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.increment_download_count(uuid) TO anon, authenticated;
