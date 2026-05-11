@@ -78,7 +78,7 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5 text-accent" />
             <h2 className="text-lg font-bold text-foreground uppercase tracking-wider">
-              {title ?? (category === "donation" ? "Donation APK/APKS" : "Uploaded APK/APKS")}
+              {title ?? (category === "donation" ? t("apk.titleDonation") : t("apk.titleFree"))}
             </h2>
             <span className="text-xs font-mono text-muted-foreground">
               [{apks.length}]
