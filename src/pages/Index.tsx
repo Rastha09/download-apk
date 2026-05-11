@@ -5,10 +5,12 @@ import { ApkList } from "@/components/ApkList";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { Navbar } from "@/components/Navbar";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/lib/i18n";
 
 const Index = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { isAdmin } = useAuth();
+  const { t } = useI18n();
 
   const handleUploadSuccess = () => {
     setRefreshTrigger((prev) => prev + 1);
