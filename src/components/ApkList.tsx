@@ -99,7 +99,7 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="> cari aplikasi..."
+            placeholder={t("apk.search")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 h-10 bg-secondary border-border font-mono text-sm rounded focus-visible:ring-primary"
