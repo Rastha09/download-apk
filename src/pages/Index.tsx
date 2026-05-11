@@ -36,7 +36,7 @@ const Index = () => {
 
             {/* APK List */}
             <div className={isAdmin ? "lg:col-span-2" : "lg:col-span-3"}>
-              <ApkList refreshTrigger={refreshTrigger} isAdmin={isAdmin} category="free" title="Gratis APK/APKS" />
+              <ApkList refreshTrigger={refreshTrigger} isAdmin={isAdmin} category="free" />
             </div>
           </div>
         </div>
