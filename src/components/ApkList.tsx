@@ -34,6 +34,7 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
   const [apks, setApks] = useState<ApkUpload[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useI18n();
 
   const fetchApks = async () => {
     setLoading(true);
