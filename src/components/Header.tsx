@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
+import { useI18n } from "@/lib/i18n";
 
 export function Header() {
+  const { t } = useI18n();
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -20,15 +22,15 @@ export function Header() {
           {/* Status indicator */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-primary/30 bg-primary/5 text-xs font-mono text-primary uppercase tracking-widest">
             <span className="w-2 h-2 rounded-full bg-primary blink" />
-            System Online
+            {t("header.status")}
           </div>
 
           <h1 className="text-3xl md:text-4xl font-bold text-foreground uppercase tracking-[0.15em]">
-            Downloader APK
+            {t("header.title")}
           </h1>
 
           <p className="text-sm md:text-base font-mono text-muted-foreground tracking-[0.3em] uppercase">
-            Upload · Download · Share
+            {t("header.subtitle")}
           </p>
         </div>
       </div>
