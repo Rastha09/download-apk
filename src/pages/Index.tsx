@@ -46,7 +46,7 @@ const Index = () => {
       <footer className="mt-auto py-6 border-t border-border/30">
         <div className="container max-w-7xl mx-auto px-4">
           <p className="text-center text-xs text-muted-foreground font-mono uppercase tracking-wider">
-            © {new Date().getFullYear()} All Rights Reserved — DEIMOS™.
+            © {new Date().getFullYear()} {t("footer.rights")} — DEIMOS™.
           </p>
         </div>
       </footer>
