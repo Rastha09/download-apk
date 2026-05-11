@@ -5,10 +5,12 @@ import { ApkList } from "@/components/ApkList";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { Navbar } from "@/components/Navbar";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/lib/i18n";
 
 const Index = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { isAdmin } = useAuth();
+  const { t } = useI18n();
 
   const handleUploadSuccess = () => {
     setRefreshTrigger((prev) => prev + 1);
@@ -36,7 +38,7 @@ const Index = () => {
 
             {/* APK List */}
             <div className={isAdmin ? "lg:col-span-2" : "lg:col-span-3"}>
-              <ApkList refreshTrigger={refreshTrigger} isAdmin={isAdmin} category="free" title="Gratis APK/APKS" />
+              <ApkList refreshTrigger={refreshTrigger} isAdmin={isAdmin} category="free" />
             </div>
           </div>
         </div>
@@ -46,7 +48,7 @@ const Index = () => {
       <footer className="mt-auto py-6 border-t border-border/30">
         <div className="container max-w-7xl mx-auto px-4">
           <p className="text-center text-xs text-muted-foreground font-mono uppercase tracking-wider">
-            © {new Date().getFullYear()} All Rights Reserved — DEIMOS™.
+            © {new Date().getFullYear()} {t("footer.rights")} — DEIMOS™.
           </p>
         </div>
       </footer>

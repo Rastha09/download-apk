@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
+import { I18nProvider } from "@/lib/i18n";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import GoRedirect from "./pages/GoRedirect";
@@ -21,6 +22,7 @@ const App = () => (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <TooltipProvider>
         <AuthProvider>
+          <I18nProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -36,6 +38,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+          </I18nProvider>
         </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>

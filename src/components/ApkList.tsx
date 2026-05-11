@@ -5,6 +5,7 @@ import { ApkCard } from "./ApkCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { useI18n } from "@/lib/i18n";
 
 interface ApkUpload {
   id: string;
@@ -33,6 +34,7 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
   const [apks, setApks] = useState<ApkUpload[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useI18n();
 
   const fetchApks = async () => {
     setLoading(true);
@@ -76,7 +78,7 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5 text-accent" />
             <h2 className="text-lg font-bold text-foreground uppercase tracking-wider">
-              {title ?? (category === "donation" ? "Donation APK/APKS" : "Uploaded APK/APKS")}
+              {title ?? (category === "donation" ? t("apk.titleDonation") : t("apk.titleFree"))}
             </h2>
             <span className="text-xs font-mono text-muted-foreground">
               [{apks.length}]
@@ -97,7 +99,7 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="> cari aplikasi..."
+            placeholder={t("apk.search")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 h-10 bg-secondary border-border font-mono text-sm rounded focus-visible:ring-primary"
@@ -132,12 +134,10 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
             <Package className="w-8 h-8 text-muted-foreground" />
           </div>
           <h3 className="text-base font-bold text-foreground mb-1 uppercase tracking-wider">
-            {searchQuery ? "Tidak Ditemukan" : "Belum Ada APK"}
+            {searchQuery ? t("apk.notFound") : t("apk.empty")}
           </h3>
           <p className="text-xs text-muted-foreground font-mono">
-            {searchQuery
-              ? "Coba kata kunci lain"
-              : "Upload APK pertama untuk memulai"}
+            {searchQuery ? t("apk.notFoundHint") : t("apk.emptyHint")}
           </p>
         </div>
       ) : (
