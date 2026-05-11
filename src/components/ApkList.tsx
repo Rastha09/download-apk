@@ -134,12 +134,10 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
             <Package className="w-8 h-8 text-muted-foreground" />
           </div>
           <h3 className="text-base font-bold text-foreground mb-1 uppercase tracking-wider">
-            {searchQuery ? "Tidak Ditemukan" : "Belum Ada APK"}
+            {searchQuery ? t("apk.notFound") : t("apk.empty")}
           </h3>
           <p className="text-xs text-muted-foreground font-mono">
-            {searchQuery
-              ? "Coba kata kunci lain"
-              : "Upload APK pertama untuk memulai"}
+            {searchQuery ? t("apk.notFoundHint") : t("apk.emptyHint")}
           </p>
         </div>
       ) : (
