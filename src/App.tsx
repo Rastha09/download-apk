@@ -22,6 +22,7 @@ const App = () => (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <TooltipProvider>
         <AuthProvider>
+          <I18nProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
