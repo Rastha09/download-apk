@@ -20,6 +20,8 @@ interface LicenseKeyRow {
   bound_fingerprints: string[] | null;
   is_active: boolean;
   created_by: string | null;
+  owner_name: string | null;
+  telegram_id: string | null;
 }
 
 const createRandomKey = () => {
