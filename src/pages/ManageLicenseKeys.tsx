@@ -52,7 +52,7 @@ const ManageLicenseKeys = () => {
     const q = searchQuery.trim().toLowerCase();
     return enriched.filter((item) => {
       if (q) {
-        const haystack = `${item.key_string} ${(item.bound_devices ?? []).join(" ")}`.toLowerCase();
+        const haystack = `${item.key_string} ${item.owner_name ?? ""} ${item.telegram_id ?? ""} ${(item.bound_devices ?? []).join(" ")}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       switch (statusFilter) {
