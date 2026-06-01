@@ -124,8 +124,14 @@ const ManageLicenseKeys = () => {
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
     const normalized = keyString.trim().toUpperCase();
+    const normalizedOwner = ownerName.trim();
+    const normalizedTg = telegramId.trim();
     if (!normalized || !expiryDate) {
       Swal.fire({ icon: "warning", title: "Lengkapi data", text: "Key dan tanggal expired wajib diisi.", confirmButtonColor: "hsl(145 65% 42%)" });
+      return;
+    }
+    if (!normalizedOwner || !normalizedTg) {
+      Swal.fire({ icon: "warning", title: "Lengkapi data", text: "Nama pemilik dan ID Telegram wajib diisi.", confirmButtonColor: "hsl(145 65% 42%)" });
       return;
     }
 
@@ -136,12 +142,16 @@ const ManageLicenseKeys = () => {
         expiry_date: expiryDate,
         created_by: user.id,
         is_active: true,
+        owner_name: normalizedOwner,
+        telegram_id: normalizedTg,
       });
       if (error) throw error;
 
       await Swal.fire({ icon: "success", title: "License key dibuat", text: "Key baru berhasil disimpan.", confirmButtonColor: "hsl(145 65% 42%)" });
       setKeyString("");
       setExpiryDate("");
+      setOwnerName("");
+      setTelegramId("");
       fetchKeys();
     } catch (error) {
       Swal.fire({ icon: "error", title: "Gagal membuat key", text: (error as Error).message, confirmButtonColor: "hsl(145 65% 42%)" });
