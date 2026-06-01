@@ -91,12 +91,12 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       });
       return;
     }
-    const maxSize = 500 * 1024 * 1024;
+    const maxSize = 600 * 1024 * 1024;
     if (file.size > maxSize) {
       Swal.fire({
         icon: "error",
         title: "File Too Large",
-        text: "Maximum file size is 500MB!",
+        text: "Maximum file size is 600MB!",
         confirmButtonColor: "hsl(145 65% 42%)",
       });
       return;
@@ -329,7 +329,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
                   </div>
                   <div>
                     <p className="font-medium text-foreground">Drag & drop your APK/APKS file here</p>
-                    <p className="text-sm text-muted-foreground">or click to browse (max 500MB)</p>
+                    <p className="text-sm text-muted-foreground">or click to browse (max 600MB)</p>
                   </div>
                 </div>
               )}
