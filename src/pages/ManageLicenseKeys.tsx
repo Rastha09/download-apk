@@ -71,7 +71,7 @@ const ManageLicenseKeys = () => {
     try {
       const { data, error } = await supabase
         .from("license_keys")
-        .select("id, key_string, expiry_date, created_at, bound_devices, bound_fingerprints, is_active, created_by")
+        .select("id, key_string, expiry_date, created_at, bound_devices, bound_fingerprints, is_active, created_by, owner_name, telegram_id")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setLicenseKeys((data ?? []) as LicenseKeyRow[]);
