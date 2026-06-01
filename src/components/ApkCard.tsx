@@ -111,11 +111,11 @@ export function ApkCard({
       });
       return;
     }
-    if (file.size > 500 * 1024 * 1024) {
+    if (file.size > 600 * 1024 * 1024) {
       Swal.fire({
         icon: "error",
         title: "File Too Large",
-        text: "Maximum file size is 500MB!",
+        text: "Maximum file size is 600MB!",
         confirmButtonColor: "hsl(145 65% 42%)",
       });
       return;
