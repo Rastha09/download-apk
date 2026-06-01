@@ -20,6 +20,8 @@ interface LicenseKeyRow {
   bound_fingerprints: string[] | null;
   is_active: boolean;
   created_by: string | null;
+  owner_name: string | null;
+  telegram_id: string | null;
 }
 
 const createRandomKey = () => {
@@ -35,6 +37,8 @@ const ManageLicenseKeys = () => {
   const [saving, setSaving] = useState(false);
   const [keyString, setKeyString] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+  const [telegramId, setTelegramId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "expired" | "bound" | "unbound">("all");
 
@@ -48,7 +52,7 @@ const ManageLicenseKeys = () => {
     const q = searchQuery.trim().toLowerCase();
     return enriched.filter((item) => {
       if (q) {
-        const haystack = `${item.key_string} ${(item.bound_devices ?? []).join(" ")}`.toLowerCase();
+        const haystack = `${item.key_string} ${item.owner_name ?? ""} ${item.telegram_id ?? ""} ${(item.bound_devices ?? []).join(" ")}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       switch (statusFilter) {
@@ -67,7 +71,7 @@ const ManageLicenseKeys = () => {
     try {
       const { data, error } = await supabase
         .from("license_keys")
-        .select("id, key_string, expiry_date, created_at, bound_devices, bound_fingerprints, is_active, created_by")
+        .select("id, key_string, expiry_date, created_at, bound_devices, bound_fingerprints, is_active, created_by, owner_name, telegram_id")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setLicenseKeys((data ?? []) as LicenseKeyRow[]);
@@ -120,8 +124,14 @@ const ManageLicenseKeys = () => {
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
     const normalized = keyString.trim().toUpperCase();
+    const normalizedOwner = ownerName.trim();
+    const normalizedTg = telegramId.trim();
     if (!normalized || !expiryDate) {
       Swal.fire({ icon: "warning", title: "Lengkapi data", text: "Key dan tanggal expired wajib diisi.", confirmButtonColor: "hsl(145 65% 42%)" });
+      return;
+    }
+    if (!normalizedOwner || !normalizedTg) {
+      Swal.fire({ icon: "warning", title: "Lengkapi data", text: "Nama pemilik dan ID Telegram wajib diisi.", confirmButtonColor: "hsl(145 65% 42%)" });
       return;
     }
 
@@ -132,12 +142,16 @@ const ManageLicenseKeys = () => {
         expiry_date: expiryDate,
         created_by: user.id,
         is_active: true,
+        owner_name: normalizedOwner,
+        telegram_id: normalizedTg,
       });
       if (error) throw error;
 
       await Swal.fire({ icon: "success", title: "License key dibuat", text: "Key baru berhasil disimpan.", confirmButtonColor: "hsl(145 65% 42%)" });
       setKeyString("");
       setExpiryDate("");
+      setOwnerName("");
+      setTelegramId("");
       fetchKeys();
     } catch (error) {
       Swal.fire({ icon: "error", title: "Gagal membuat key", text: (error as Error).message, confirmButtonColor: "hsl(145 65% 42%)" });
@@ -230,29 +244,41 @@ const ManageLicenseKeys = () => {
             </div>
           </div>
 
-          <form onSubmit={handleCreate} className="grid grid-cols-1 lg:grid-cols-[1.4fr_0.9fr_auto] gap-3 items-end">
-            <div className="space-y-2">
-              <Label htmlFor="license-key-string">License Key (Manual / Generate)</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="license-key-string"
-                  value={keyString}
-                  onChange={(e) => setKeyString(e.target.value.toUpperCase())}
-                  placeholder="Ketik manual atau klik Generate"
-                  className="font-mono uppercase tracking-wider"
-                />
-                <Button type="button" variant="outline" onClick={handleGenerate} className="uppercase font-mono" title="Generate otomatis (opsional)">
-                  <RefreshCw className="w-4 h-4" />
-                  Auto
-                </Button>
+          <form onSubmit={handleCreate} className="space-y-3">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_0.9fr] gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="license-key-string">License Key (Manual / Generate)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="license-key-string"
+                    value={keyString}
+                    onChange={(e) => setKeyString(e.target.value.toUpperCase())}
+                    placeholder="Ketik manual atau klik Generate"
+                    className="font-mono uppercase tracking-wider"
+                  />
+                  <Button type="button" variant="outline" onClick={handleGenerate} className="uppercase font-mono" title="Generate otomatis (opsional)">
+                    <RefreshCw className="w-4 h-4" />
+                    Auto
+                  </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground font-mono">Bebas format — admin bisa membuat key manual sesuai keinginan.</p>
               </div>
-              <p className="text-[10px] text-muted-foreground font-mono">Bebas format — admin bisa membuat key manual sesuai keinginan.</p>
+              <div className="space-y-2">
+                <Label htmlFor="license-expiry">Tanggal Expired</Label>
+                <Input id="license-expiry" type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} min={new Date().toISOString().split("T")[0]} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="license-expiry">Tanggal Expired</Label>
-              <Input id="license-expiry" type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} min={new Date().toISOString().split("T")[0]} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="owner-name">Nama / Username</Label>
+                <Input id="owner-name" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} placeholder="Contoh: rasta" className="font-mono" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="telegram-id">ID Telegram</Label>
+                <Input id="telegram-id" value={telegramId} onChange={(e) => setTelegramId(e.target.value)} placeholder="Contoh: 1252474" className="font-mono" inputMode="numeric" />
+              </div>
             </div>
-            <Button type="submit" disabled={saving} className="uppercase tracking-wider font-mono">
+            <Button type="submit" disabled={saving} className="uppercase tracking-wider font-mono w-full md:w-auto">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               Buat Key
             </Button>
@@ -322,10 +348,11 @@ const ManageLicenseKeys = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-            <Table className="min-w-[760px]">
+            <Table className="min-w-[900px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Key</TableHead>
+                  <TableHead>Pemilik</TableHead>
                   <TableHead>Expired</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Bound Devices</TableHead>
@@ -350,6 +377,16 @@ const ManageLicenseKeys = () => {
                           <Copy className="h-3.5 w-3.5" />
                         </Button>
                       </div>
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {row.owner_name || row.telegram_id ? (
+                        <div className="flex flex-col gap-0.5 max-w-[200px]">
+                          <span className="text-foreground truncate" title={row.owner_name ?? ""}>{row.owner_name || "-"}</span>
+                          <span className="text-[10px] text-muted-foreground truncate" title={row.telegram_id ?? ""}>TG: {row.telegram_id || "-"}</span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
                     </TableCell>
                     <TableCell className="font-mono text-xs">{new Date(row.expiry_date).toLocaleDateString("id-ID")}</TableCell>
                     <TableCell>
