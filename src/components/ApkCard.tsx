@@ -263,7 +263,7 @@ export function ApkCard({
       }
 
       // Free APKs: direct download tanpa safelinku/iklan
-      await supabase.rpc("increment_download_count", { apk_id: id });
+      await supabase.functions.invoke("increment-download", { body: { apkId: id } });
       const link = document.createElement("a");
       link.href = downloadUrl;
       link.download = fileName;
