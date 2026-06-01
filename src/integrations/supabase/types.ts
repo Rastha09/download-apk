@@ -105,6 +105,8 @@ export type Database = {
           id: string
           is_active: boolean
           key_string: string
+          owner_name: string | null
+          telegram_id: string | null
         }
         Insert: {
           bound_devices?: string[]
@@ -116,6 +118,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           key_string: string
+          owner_name?: string | null
+          telegram_id?: string | null
         }
         Update: {
           bound_devices?: string[]
@@ -127,6 +131,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           key_string?: string
+          owner_name?: string | null
+          telegram_id?: string | null
         }
         Relationships: []
       }
