@@ -244,29 +244,41 @@ const ManageLicenseKeys = () => {
             </div>
           </div>
 
-          <form onSubmit={handleCreate} className="grid grid-cols-1 lg:grid-cols-[1.4fr_0.9fr_auto] gap-3 items-end">
-            <div className="space-y-2">
-              <Label htmlFor="license-key-string">License Key (Manual / Generate)</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="license-key-string"
-                  value={keyString}
-                  onChange={(e) => setKeyString(e.target.value.toUpperCase())}
-                  placeholder="Ketik manual atau klik Generate"
-                  className="font-mono uppercase tracking-wider"
-                />
-                <Button type="button" variant="outline" onClick={handleGenerate} className="uppercase font-mono" title="Generate otomatis (opsional)">
-                  <RefreshCw className="w-4 h-4" />
-                  Auto
-                </Button>
+          <form onSubmit={handleCreate} className="space-y-3">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_0.9fr] gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="license-key-string">License Key (Manual / Generate)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="license-key-string"
+                    value={keyString}
+                    onChange={(e) => setKeyString(e.target.value.toUpperCase())}
+                    placeholder="Ketik manual atau klik Generate"
+                    className="font-mono uppercase tracking-wider"
+                  />
+                  <Button type="button" variant="outline" onClick={handleGenerate} className="uppercase font-mono" title="Generate otomatis (opsional)">
+                    <RefreshCw className="w-4 h-4" />
+                    Auto
+                  </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground font-mono">Bebas format — admin bisa membuat key manual sesuai keinginan.</p>
               </div>
-              <p className="text-[10px] text-muted-foreground font-mono">Bebas format — admin bisa membuat key manual sesuai keinginan.</p>
+              <div className="space-y-2">
+                <Label htmlFor="license-expiry">Tanggal Expired</Label>
+                <Input id="license-expiry" type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} min={new Date().toISOString().split("T")[0]} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="license-expiry">Tanggal Expired</Label>
-              <Input id="license-expiry" type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} min={new Date().toISOString().split("T")[0]} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="owner-name">Nama / Username</Label>
+                <Input id="owner-name" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} placeholder="Contoh: rasta" className="font-mono" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="telegram-id">ID Telegram</Label>
+                <Input id="telegram-id" value={telegramId} onChange={(e) => setTelegramId(e.target.value)} placeholder="Contoh: 1252474" className="font-mono" inputMode="numeric" />
+              </div>
             </div>
-            <Button type="submit" disabled={saving} className="uppercase tracking-wider font-mono">
+            <Button type="submit" disabled={saving} className="uppercase tracking-wider font-mono w-full md:w-auto">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               Buat Key
             </Button>
