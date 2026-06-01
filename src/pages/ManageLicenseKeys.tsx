@@ -348,10 +348,11 @@ const ManageLicenseKeys = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-            <Table className="min-w-[760px]">
+            <Table className="min-w-[900px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Key</TableHead>
+                  <TableHead>Pemilik</TableHead>
                   <TableHead>Expired</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Bound Devices</TableHead>
