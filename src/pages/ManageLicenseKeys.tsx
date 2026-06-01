@@ -378,6 +378,16 @@ const ManageLicenseKeys = () => {
                         </Button>
                       </div>
                     </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {row.owner_name || row.telegram_id ? (
+                        <div className="flex flex-col gap-0.5 max-w-[200px]">
+                          <span className="text-foreground truncate" title={row.owner_name ?? ""}>{row.owner_name || "-"}</span>
+                          <span className="text-[10px] text-muted-foreground truncate" title={row.telegram_id ?? ""}>TG: {row.telegram_id || "-"}</span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
                     <TableCell className="font-mono text-xs">{new Date(row.expiry_date).toLocaleDateString("id-ID")}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-2">
