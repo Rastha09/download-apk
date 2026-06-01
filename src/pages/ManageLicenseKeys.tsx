@@ -37,6 +37,8 @@ const ManageLicenseKeys = () => {
   const [saving, setSaving] = useState(false);
   const [keyString, setKeyString] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+  const [telegramId, setTelegramId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "expired" | "bound" | "unbound">("all");
 
