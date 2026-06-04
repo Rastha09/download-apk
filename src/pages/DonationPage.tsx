@@ -240,7 +240,9 @@ const DonationPage = () => {
               </div>
               <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-wider text-foreground">APK Donasi</h1>
               <p className="text-sm text-muted-foreground font-mono max-w-xl">
-                Masukkan license key aktif untuk membuka daftar APK donasi. Key akan terikat ke perangkat (browser) saat pertama kali digunakan, jadi aman digunakan saat berganti WiFi atau data seluler.
+                {LICENSE_KEY_REQUIRED
+                  ? "Masukkan license key aktif untuk membuka daftar APK donasi. Key akan terikat ke perangkat (browser) saat pertama kali digunakan, jadi aman digunakan saat berganti WiFi atau data seluler."
+                  : "Daftar APK donasi terbuka untuk semua pengunjung. Dukung terus pengembangan dengan berdonasi agar layanan tetap berjalan."}
               </p>
             </div>
 
