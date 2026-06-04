@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { getLicenseSession } from "@/lib/license-session";
 import { getDeviceFingerprint, getDeviceId } from "@/lib/device-id";
+import { LICENSE_KEY_REQUIRED } from "@/lib/feature-flags";
 
 interface DonationApk {
   id: string;
