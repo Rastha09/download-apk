@@ -141,6 +141,7 @@ const DonationPage = () => {
   }, [invokeLicenseValidation, revokeAccess]);
 
   useEffect(() => {
+    if (!LICENSE_KEY_REQUIRED) return;
     if (!authorized) return;
 
     const handleVisibilityChange = () => {
