@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (!isAdmin) {
+    if (LICENSE_KEY_REQUIRED && !isAdmin) {
       const body = await req.json().catch(() => null);
       const key = String(body?.key ?? "").trim().toUpperCase();
       const deviceId = String(body?.deviceId ?? "").trim();
