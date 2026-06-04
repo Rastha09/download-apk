@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { getLicenseSession } from "@/lib/license-session";
 import { getDeviceFingerprint, getDeviceId } from "@/lib/device-id";
+import { LICENSE_KEY_REQUIRED } from "@/lib/feature-flags";
 
 interface DonationApk {
   id: string;
@@ -34,10 +35,14 @@ export function DonationApkList({ refreshTrigger, isAdmin = false }: DonationApk
   const fetchApks = async () => {
     setLoading(true);
     try {
-      const session = getLicenseSession();
-      const fingerprint = await getDeviceFingerprint();
+      let body: Record<string, unknown> = {};
+      if (LICENSE_KEY_REQUIRED) {
+        const session = getLicenseSession();
+        const fingerprint = await getDeviceFingerprint();
+        body = { key: session?.key ?? "", deviceId: getDeviceId(), fingerprint };
+      }
       const { data, error } = await supabase.functions.invoke("list-donation-apks", {
-        body: { key: session?.key ?? "", deviceId: getDeviceId(), fingerprint },
+        body,
       });
       if (error) throw error;
       setApks((data?.apks as DonationApk[]) ?? []);

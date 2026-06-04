@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { clearLicenseSession, getLicenseSession, isLicenseSessionActive, saveLicenseSession } from "@/lib/license-session";
 import { getDeviceFingerprint, getDeviceId } from "@/lib/device-id";
+import { LICENSE_KEY_REQUIRED } from "@/lib/feature-flags";
 
 type ValidationResult = {
   is_valid: boolean;
@@ -23,8 +24,8 @@ const DonationPage = () => {
   const { isAdmin } = useAuth();
   const [licenseKey, setLicenseKey] = useState("");
   const [validating, setValidating] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
-  const [authorized, setAuthorized] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(LICENSE_KEY_REQUIRED);
+  const [authorized, setAuthorized] = useState(!LICENSE_KEY_REQUIRED);
   const [expiryDate, setExpiryDate] = useState<string | null>(null);
   const [refreshTrigger] = useState(0);
   const revalidatingRef = useRef(false);
@@ -68,6 +69,7 @@ const DonationPage = () => {
   }, []);
 
   useEffect(() => {
+    if (!LICENSE_KEY_REQUIRED) return;
     let cancelled = false;
 
     const restoreSession = async () => {
@@ -139,6 +141,7 @@ const DonationPage = () => {
   }, [invokeLicenseValidation, revokeAccess]);
 
   useEffect(() => {
+    if (!LICENSE_KEY_REQUIRED) return;
     if (!authorized) return;
 
     const handleVisibilityChange = () => {
@@ -237,7 +240,9 @@ const DonationPage = () => {
               </div>
               <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-wider text-foreground">APK Donasi</h1>
               <p className="text-sm text-muted-foreground font-mono max-w-xl">
-                Masukkan license key aktif untuk membuka daftar APK donasi. Key akan terikat ke perangkat (browser) saat pertama kali digunakan, jadi aman digunakan saat berganti WiFi atau data seluler.
+                {LICENSE_KEY_REQUIRED
+                  ? "Masukkan license key aktif untuk membuka daftar APK donasi. Key akan terikat ke perangkat (browser) saat pertama kali digunakan, jadi aman digunakan saat berganti WiFi atau data seluler."
+                  : "Daftar APK donasi terbuka untuk semua pengunjung. Dukung terus pengembangan dengan berdonasi agar layanan tetap berjalan."}
               </p>
             </div>
 
@@ -249,7 +254,7 @@ const DonationPage = () => {
                 </div>
                 <p>Bypass license aktif</p>
               </div>
-            ) : authorized && (
+            ) : LICENSE_KEY_REQUIRED && authorized && (
               <div className="rounded border border-border bg-secondary/40 px-4 py-3 text-sm font-mono text-muted-foreground">
                 <div className="flex items-center gap-2 text-primary font-semibold uppercase tracking-wider mb-1">
                   <ShieldCheck className="w-4 h-4" />
