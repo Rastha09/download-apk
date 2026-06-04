@@ -24,8 +24,8 @@ const DonationPage = () => {
   const { isAdmin } = useAuth();
   const [licenseKey, setLicenseKey] = useState("");
   const [validating, setValidating] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
-  const [authorized, setAuthorized] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(LICENSE_KEY_REQUIRED);
+  const [authorized, setAuthorized] = useState(!LICENSE_KEY_REQUIRED);
   const [expiryDate, setExpiryDate] = useState<string | null>(null);
   const [refreshTrigger] = useState(0);
   const revalidatingRef = useRef(false);
