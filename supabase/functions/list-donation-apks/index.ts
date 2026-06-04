@@ -6,6 +6,10 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+// Toggle: set to true untuk mengaktifkan kembali validasi license key
+// pada list APK donasi. Harus sinkron dengan src/lib/feature-flags.ts.
+const LICENSE_KEY_REQUIRED = false;
+
 const keyPattern = /^[A-Z0-9-]{1,64}$/;
 
 // Simple in-memory IP rate limiter
