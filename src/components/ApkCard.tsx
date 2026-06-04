@@ -238,13 +238,18 @@ export function ApkCard({
     try {
       // Donation APKs: server-side license check, then direct download
       if (category === "donation") {
-        const { getLicenseSession } = await import("@/lib/license-session");
-        const { getDeviceId, getDeviceFingerprint } = await import("@/lib/device-id");
-        const session = getLicenseSession();
-        const fingerprint = await getDeviceFingerprint();
+        const { LICENSE_KEY_REQUIRED } = await import("@/lib/feature-flags");
+        let payload: Record<string, unknown> = { apkId: id };
+        if (LICENSE_KEY_REQUIRED) {
+          const { getLicenseSession } = await import("@/lib/license-session");
+          const { getDeviceId, getDeviceFingerprint } = await import("@/lib/device-id");
+          const session = getLicenseSession();
+          const fingerprint = await getDeviceFingerprint();
+          payload = { apkId: id, key: session?.key ?? "", deviceId: getDeviceId(), fingerprint };
+        }
         const { data: dl, error: dlError } = await supabase.functions.invoke(
           "get-donation-download",
-          { body: { apkId: id, key: session?.key ?? "", deviceId: getDeviceId(), fingerprint } }
+          { body: payload }
         );
         if (dlError || !dl?.downloadUrl) {
           throw new Error(dl?.error || dlError?.message || "Gagal menyiapkan download");
