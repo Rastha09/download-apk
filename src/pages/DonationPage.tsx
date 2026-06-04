@@ -254,7 +254,7 @@ const DonationPage = () => {
                 </div>
                 <p>Bypass license aktif</p>
               </div>
-            ) : authorized && (
+            ) : LICENSE_KEY_REQUIRED && authorized && (
               <div className="rounded border border-border bg-secondary/40 px-4 py-3 text-sm font-mono text-muted-foreground">
                 <div className="flex items-center gap-2 text-primary font-semibold uppercase tracking-wider mb-1">
                   <ShieldCheck className="w-4 h-4" />
