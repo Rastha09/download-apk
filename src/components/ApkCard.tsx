@@ -262,15 +262,15 @@ export function ApkCard({
         return;
       }
 
-      // Free APKs: direct download tanpa safelinku/iklan
-      await supabase.functions.invoke("increment-download", { body: { apkId: id } });
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = fileName;
-      link.rel = "noopener noreferrer";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Free APKs: lewat Safelinku untuk monetisasi (lihat iklan)
+      const { data: sl, error: slError } = await supabase.functions.invoke(
+        "generate-safelink",
+        { body: { apkId: id } }
+      );
+      if (slError || !sl?.shortlink) {
+        throw new Error(sl?.error || slError?.message || "Gagal membuat safelink");
+      }
+      window.location.href = sl.shortlink;
       setIsRedirecting(false);
       setShowModal(false);
       onDownloadComplete?.();
