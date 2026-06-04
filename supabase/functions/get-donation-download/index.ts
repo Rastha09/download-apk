@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (!isAdmin) {
+    if (LICENSE_KEY_REQUIRED && !isAdmin) {
       const key = String(body?.key ?? "").trim().toUpperCase();
       const deviceId = String(body?.deviceId ?? "").trim();
       const fingerprint = String(body?.fingerprint ?? "").trim();
