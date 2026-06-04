@@ -94,8 +94,8 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
                   </>
                 ) : (
                   <>
-                    <span className="text-primary">Unduhan siap!</span>{" "}
-                    File akan diunduh langsung tanpa iklan.
+                    <span className="text-primary">Hampir selesai!</span>{" "}
+                    Anda akan diarahkan ke halaman sponsor sebentar untuk mendukung layanan tetap gratis sebelum unduhan dimulai.
                   </>
                 )}
               </p>
