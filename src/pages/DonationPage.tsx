@@ -69,6 +69,7 @@ const DonationPage = () => {
   }, []);
 
   useEffect(() => {
+    if (!LICENSE_KEY_REQUIRED) return;
     let cancelled = false;
 
     const restoreSession = async () => {
