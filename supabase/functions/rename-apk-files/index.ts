@@ -9,34 +9,14 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
-
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-
-    const token = authHeader.replace("Bearer ", "");
     const admin = createClient(supabaseUrl, serviceKey);
 
-    // Allow either service role key or an authenticated admin user
-    let allowed = token === serviceKey;
-    if (!allowed) {
-      const userClient = createClient(supabaseUrl, anonKey, {
-        global: { headers: { Authorization: authHeader } },
-      });
-      const { data: userData } = await userClient.auth.getUser();
-      if (userData?.user) {
-        const { data: roleData } = await admin
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userData.user.id);
-        allowed = !!roleData?.some((r: any) => r.role === "admin" || r.role === "super_admin");
-      }
-    }
-    if (!allowed) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
-
-    const { data: rows, error } = await admin.from("apk_uploads").select("id, file_path");
+    const { data: rows, error } = await admin
+      .from("apk_uploads")
+      .select("id, file_path")
+      .limit(50);
     if (error) throw error;
 
     const results: any[] = [];
