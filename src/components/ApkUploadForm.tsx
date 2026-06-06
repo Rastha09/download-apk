@@ -42,9 +42,10 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
 
   const extractAppInfo = (fileName: string) => {
     const nameWithoutExt = fileName.replace(/\.(apk|apks)$/i, "");
+    // Match version, optionally prefixed by "v" or "V." etc., bounded by separators or start
     const versionPatterns = [
-      /[_\-\s]v?(\d+\.\d+(?:\.\d+)?(?:\.\d+)?)/i,
-      /[_\-\s](\d+\.\d+(?:\.\d+)?(?:\.\d+)?)$/i,
+      /(?:^|[_\-\s\.\(\[])v\.?\s*(\d+(?:\.\d+){1,3})/i,
+      /(?:^|[_\-\s\(\[])(\d+(?:\.\d+){1,3})/,
     ];
     let version = "1.0";
     let appName = nameWithoutExt;
@@ -52,11 +53,11 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       const match = nameWithoutExt.match(pattern);
       if (match) {
         version = match[1];
-        appName = nameWithoutExt.replace(pattern, "").trim();
+        appName = nameWithoutExt.replace(pattern, " ").trim();
         break;
       }
     }
-    appName = appName.replace(/[_\-]+/g, " ").trim();
+    appName = appName.replace(/[_\-]+/g, " ").replace(/\s+/g, " ").trim();
     appName = appName.replace(/\b\w/g, (c) => c.toUpperCase());
     return { appName, version };
   };
