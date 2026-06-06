@@ -126,7 +126,10 @@ export function ApkCard({
     try {
       const timestamp = Date.now();
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-      const newPath = `${timestamp}_${sanitizedName}`;
+      const dotIdx = sanitizedName.lastIndexOf(".");
+      const base = dotIdx > 0 ? sanitizedName.slice(0, dotIdx) : sanitizedName;
+      const ext = dotIdx > 0 ? sanitizedName.slice(dotIdx) : "";
+      const newPath = `${base}_${timestamp}${ext}`;
 
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData?.session?.access_token;
