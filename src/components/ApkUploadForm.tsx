@@ -141,7 +141,10 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
     try {
       const timestamp = Date.now();
       const sanitizedName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-      const filePath = `${timestamp}_${sanitizedName}`;
+      const dotIdx = sanitizedName.lastIndexOf(".");
+      const base = dotIdx > 0 ? sanitizedName.slice(0, dotIdx) : sanitizedName;
+      const ext = dotIdx > 0 ? sanitizedName.slice(dotIdx) : "";
+      const filePath = `${base}_${timestamp}${ext}`;
 
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData?.session?.access_token;
