@@ -40,7 +40,7 @@ const dict = {
     "faq.q1": "Apa itu DEIMOS MODS™?",
     "faq.a1": "Platform untuk berbagi file APK/APKS modifikasi. Upload oleh admin, download gratis oleh siapa saja.",
     "faq.q2": "Apakah download gratis?",
-    "faq.a2": "Ya, semua file bisa didownload gratis. Anda akan melewati halaman iklan singkat (Safelinku) untuk mendukung layanan tetap gratis.",
+    "faq.a2": "Ya, semua file bisa didownload gratis secara langsung tanpa iklan.",
     "faq.q3": "Mengapa ada cooldown saat download?",
     "faq.a3": "Cooldown mencegah spam klik dan melindungi server dari beban berlebih.",
     "faq.q4": "Bagaimana cara upload APK?",
