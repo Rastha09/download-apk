@@ -137,7 +137,7 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
                     className="w-full h-12 text-base font-bold uppercase tracking-wider bg-primary text-primary-foreground hover:bg-primary/90 rounded-[4px] transition-all"
                   >
                     <Download className="w-5 h-5 mr-2" />
-                    Lanjutkan Download
+                    Mulai Download
                   </Button>
                   <Button
                     variant="ghost"
