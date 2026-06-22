@@ -30,10 +30,13 @@ interface ApkListProps {
   title?: string;
 }
 
+const PAGE_SIZE = 6;
+
 export function ApkList({ refreshTrigger, isAdmin = false, category = "free", title }: ApkListProps) {
   const [apks, setApks] = useState<ApkUpload[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const { t } = useI18n();
 
   const fetchApks = async () => {
@@ -64,6 +67,13 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
       apk.version.toLowerCase().includes(searchQuery.toLowerCase()) ||
       apk.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [searchQuery, refreshTrigger, category]);
+
+  const visibleApks = filteredApks.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredApks.length;
 
   return (
     <motion.div
