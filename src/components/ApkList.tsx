@@ -30,10 +30,13 @@ interface ApkListProps {
   title?: string;
 }
 
+const PAGE_SIZE = 6;
+
 export function ApkList({ refreshTrigger, isAdmin = false, category = "free", title }: ApkListProps) {
   const [apks, setApks] = useState<ApkUpload[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const { t } = useI18n();
 
   const fetchApks = async () => {
@@ -64,6 +67,13 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
       apk.version.toLowerCase().includes(searchQuery.toLowerCase()) ||
       apk.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [searchQuery, refreshTrigger, category]);
+
+  const visibleApks = filteredApks.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredApks.length;
 
   return (
     <motion.div
@@ -141,32 +151,45 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredApks.map((apk, index) => (
-            <ApkCard
-              key={apk.id}
-              id={apk.id}
-              appName={apk.app_name}
-              version={apk.version}
-              description={apk.description}
-              fileName={apk.file_name}
-              filePath={apk.file_path}
-              downloadUrl={apk.download_url}
-              fileSize={apk.file_size ?? undefined}
-              downloadCount={apk.download_count}
-              iconUrl={apk.icon_url ?? undefined}
-              category={apk.category}
-              
-              createdAt={apk.created_at}
-              index={index}
-              onDelete={fetchApks}
-              onDownloadComplete={fetchApks}
-              onEdit={fetchApks}
-              showDelete={isAdmin}
-              isAdmin={isAdmin}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {visibleApks.map((apk, index) => (
+              <ApkCard
+                key={apk.id}
+                id={apk.id}
+                appName={apk.app_name}
+                version={apk.version}
+                description={apk.description}
+                fileName={apk.file_name}
+                filePath={apk.file_path}
+                downloadUrl={apk.download_url}
+                fileSize={apk.file_size ?? undefined}
+                downloadCount={apk.download_count}
+                iconUrl={apk.icon_url ?? undefined}
+                category={apk.category}
+
+                createdAt={apk.created_at}
+                index={index}
+                onDelete={fetchApks}
+                onDownloadComplete={fetchApks}
+                onEdit={fetchApks}
+                showDelete={isAdmin}
+                isAdmin={isAdmin}
+              />
+            ))}
+          </div>
+          {hasMore && (
+            <div className="flex justify-center mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                className="font-mono uppercase tracking-wider rounded"
+              >
+                Tampilkan Lebih Banyak ({filteredApks.length - visibleCount})
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </motion.div>
   );
