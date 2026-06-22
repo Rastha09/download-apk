@@ -270,15 +270,28 @@ export function ApkCard({
         return;
       }
 
-      // Free APKs: lewat Safelinku untuk monetisasi (lihat iklan)
-      const { data: sl, error: slError } = await supabase.functions.invoke(
-        "generate-safelink",
-        { body: { apkId: id } }
-      );
-      if (slError || !sl?.shortlink) {
-        throw new Error(sl?.error || slError?.message || "Gagal membuat safelink");
+      // Free APKs: bisa lewat Safelinku (monetisasi) atau langsung tergantung feature flag
+      const { SAFELINK_REQUIRED } = await import("@/lib/feature-flags");
+      if (SAFELINK_REQUIRED) {
+        const { data: sl, error: slError } = await supabase.functions.invoke(
+          "generate-safelink",
+          { body: { apkId: id } }
+        );
+        if (slError || !sl?.shortlink) {
+          throw new Error(sl?.error || slError?.message || "Gagal membuat safelink");
+        }
+        window.location.href = sl.shortlink;
+      } else {
+        // Direct download tanpa iklan
+        await supabase.functions.invoke("increment-download", { body: { apkId: id } }).catch(() => {});
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileName;
+        link.rel = "noopener noreferrer";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
-      window.location.href = sl.shortlink;
       setIsRedirecting(false);
       setShowModal(false);
       onDownloadComplete?.();
