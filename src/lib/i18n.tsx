@@ -56,7 +56,7 @@ const dict = {
     "about.featuresTitle": "Fitur Utama",
     "about.feature1": "Upload file APK/APKS hingga 600MB",
     "about.feature2": "Ekstraksi ikon otomatis dari file APK",
-    "about.feature3": "Download melalui Safelinku shortlink",
+    "about.feature3": "Download langsung tanpa iklan",
     "about.feature4": "Pencarian & filter aplikasi",
     "about.feature5": "Tema gelap cyber dengan partikel interaktif",
     "about.feature6": "Responsif untuk semua perangkat",
