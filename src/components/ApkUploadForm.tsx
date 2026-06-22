@@ -210,7 +210,7 @@ export function ApkUploadForm({ onUploadSuccess }: ApkUploadFormProps) {
       Swal.fire({
         icon: "success",
         title: "Upload Berhasil!",
-        text: "APK telah diupload dan siap didownload melalui Safelinku.",
+        text: "APK telah diupload dan siap didownload.",
         confirmButtonColor: "hsl(145 65% 42%)",
       });
 
