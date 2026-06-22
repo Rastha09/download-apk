@@ -185,7 +185,7 @@ export function ApkList({ refreshTrigger, isAdmin = false, category = "free", ti
                 onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
                 className="font-mono uppercase tracking-wider rounded"
               >
-                {t("apk.loadMore") ?? "Load More"} ({filteredApks.length - visibleCount})
+                Tampilkan Lebih Banyak ({filteredApks.length - visibleCount})
               </Button>
             </div>
           )}
