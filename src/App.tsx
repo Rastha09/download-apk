@@ -14,6 +14,7 @@ import ManageAdmins from "./pages/ManageAdmins";
 import DonationPage from "./pages/DonationPage";
 import ManageLicenseKeys from "./pages/ManageLicenseKeys";
 import NotFound from "./pages/NotFound";
+import BackgroundMusic from "./components/BackgroundMusic";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <I18nProvider>
           <Toaster />
           <Sonner />
+          <BackgroundMusic />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
