@@ -7,23 +7,18 @@ const BackgroundMusic = () => {
   const [muted, setMuted] = useState(true);
 
   useEffect(() => {
-    const audio = new Audio(musicAsset.url);
-    audio.loop = true;
-    audio.volume = 0.5;
-    audio.muted = true; // mulai muted supaya autoplay diizinkan browser
-    audio.autoplay = true;
-    (audio as HTMLAudioElement & { playsInline?: boolean }).playsInline = true;
-    audioRef.current = audio;
-
-    const startPlay = () => {
-      audio.play().catch(() => {});
-    };
-    startPlay();
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = 0.6;
+    audio.muted = true;
+    audio.play().catch(() => {});
 
     const unmute = () => {
       audio.muted = false;
+      audio.volume = 0.6;
+      const p = audio.play();
+      if (p && typeof p.then === "function") p.catch(() => {});
       setMuted(false);
-      if (audio.paused) audio.play().catch(() => {});
       removeListeners();
     };
 
@@ -40,13 +35,11 @@ const BackgroundMusic = () => {
       events.forEach((ev) => window.removeEventListener(ev, unmute));
     };
     events.forEach((ev) =>
-      window.addEventListener(ev, unmute, { once: true, passive: true })
+      window.addEventListener(ev, unmute, { passive: true })
     );
 
     return () => {
       removeListeners();
-      audio.pause();
-      audio.src = "";
     };
   }, []);
 
@@ -56,17 +49,31 @@ const BackgroundMusic = () => {
     const next = !audio.muted;
     audio.muted = next;
     setMuted(next);
-    if (audio.paused) audio.play().catch(() => {});
+    if (!next) {
+      audio.volume = 0.6;
+      audio.play().catch(() => {});
+    }
   };
 
   return (
-    <button
-      onClick={toggleMute}
-      aria-label={muted ? "Nyalakan musik" : "Senyapkan musik"}
-      className="fixed bottom-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-primary/40 bg-card/80 text-primary shadow-lg backdrop-blur transition hover:bg-card"
-    >
-      {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-    </button>
+    <>
+      <audio
+        ref={audioRef}
+        src={musicAsset.url}
+        loop
+        autoPlay
+        playsInline
+        preload="auto"
+        className="hidden"
+      />
+      <button
+        onClick={toggleMute}
+        aria-label={muted ? "Nyalakan musik" : "Senyapkan musik"}
+        className="fixed bottom-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-primary/40 bg-card/80 text-primary shadow-lg backdrop-blur transition hover:bg-card"
+      >
+        {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+      </button>
+    </>
   );
 };
 
