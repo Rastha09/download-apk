@@ -4,64 +4,68 @@ import musicAsset from "@/assets/luka-negara.mp3.asset.json";
 
 const BackgroundMusic = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true);
 
   useEffect(() => {
     const audio = new Audio(musicAsset.url);
     audio.loop = true;
     audio.volume = 0.5;
+    audio.muted = true; // mulai muted supaya autoplay diizinkan browser
+    audio.autoplay = true;
+    (audio as HTMLAudioElement & { playsInline?: boolean }).playsInline = true;
     audioRef.current = audio;
 
-    const tryPlay = async () => {
-      try {
-        await audio.play();
-        setPlaying(true);
-      } catch {
-        // Autoplay diblokir browser, tunggu interaksi user
-      }
+    const startPlay = () => {
+      audio.play().catch(() => {});
+    };
+    startPlay();
+
+    const unmute = () => {
+      audio.muted = false;
+      setMuted(false);
+      if (audio.paused) audio.play().catch(() => {});
+      removeListeners();
     };
 
-    tryPlay();
-
-    const onInteract = () => {
-      if (audio.paused) {
-        audio.play().then(() => setPlaying(true)).catch(() => {});
-      }
+    const events: (keyof WindowEventMap)[] = [
+      "click",
+      "touchstart",
+      "touchend",
+      "pointerdown",
+      "keydown",
+      "scroll",
+      "wheel",
+    ];
+    const removeListeners = () => {
+      events.forEach((ev) => window.removeEventListener(ev, unmute));
     };
-    window.addEventListener("click", onInteract, { once: true });
-    window.addEventListener("touchstart", onInteract, { once: true });
-    window.addEventListener("keydown", onInteract, { once: true });
+    events.forEach((ev) =>
+      window.addEventListener(ev, unmute, { once: true, passive: true })
+    );
 
     return () => {
+      removeListeners();
       audio.pause();
       audio.src = "";
-      window.removeEventListener("click", onInteract);
-      window.removeEventListener("touchstart", onInteract);
-      window.removeEventListener("keydown", onInteract);
     };
   }, []);
 
   const toggleMute = () => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (audio.paused) {
-      audio.play().then(() => setPlaying(true)).catch(() => {});
-      audio.muted = false;
-      setMuted(false);
-      return;
-    }
-    audio.muted = !audio.muted;
-    setMuted(audio.muted);
+    const next = !audio.muted;
+    audio.muted = next;
+    setMuted(next);
+    if (audio.paused) audio.play().catch(() => {});
   };
 
   return (
     <button
       onClick={toggleMute}
-      aria-label={muted || !playing ? "Putar musik" : "Senyapkan musik"}
+      aria-label={muted ? "Nyalakan musik" : "Senyapkan musik"}
       className="fixed bottom-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-primary/40 bg-card/80 text-primary shadow-lg backdrop-blur transition hover:bg-card"
     >
-      {muted || !playing ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+      {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
     </button>
   );
 };
