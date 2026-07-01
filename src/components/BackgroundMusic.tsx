@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import musicAsset from "@/assets/luka-negara.mp3.asset.json";
 
 const BackgroundMusic = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const userPausedRef = useRef(false);
+  const lastButtonActionAtRef = useRef(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const startMusic = useCallback((force = false) => {
@@ -56,9 +57,13 @@ const BackgroundMusic = () => {
     };
   }, []);
 
-  const toggleMusic = (event?: React.PointerEvent<HTMLButtonElement> | React.MouseEvent<HTMLButtonElement>) => {
+  const toggleMusic = (event?: PointerEvent<HTMLButtonElement> | MouseEvent<HTMLButtonElement>) => {
     event?.preventDefault();
     event?.stopPropagation();
+
+    const now = Date.now();
+    if (now - lastButtonActionAtRef.current < 500) return;
+    lastButtonActionAtRef.current = now;
 
     const audio = audioRef.current;
     if (!audio || !isPlaying) {
