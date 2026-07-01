@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import musicAsset from "@/assets/luka-negara.mp3.asset.json";
 
 const BackgroundMusic = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const userPausedRef = useRef(false);
+  const lastButtonActionAtRef = useRef(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const startMusic = useCallback((force = false) => {
@@ -15,12 +16,14 @@ const BackgroundMusic = () => {
       audio = new Audio(musicAsset.url);
       audio.loop = true;
       audio.preload = "auto";
+      audio.setAttribute("playsinline", "true");
+      audio.style.display = "none";
+      document.body.appendChild(audio);
       audioRef.current = audio;
     }
 
     audio.muted = false;
     audio.volume = 0.6;
-    audio.load();
 
     const playPromise = audio.play();
     if (playPromise && typeof playPromise.then === "function") {
@@ -36,23 +39,32 @@ const BackgroundMusic = () => {
     if (isPlaying || userPausedRef.current) return;
 
     const unlock = () => startMusic();
-    const events: (keyof WindowEventMap)[] = ["pointerdown", "touchend", "click", "keydown"];
+    const events: (keyof DocumentEventMap)[] = ["pointerdown", "pointerup", "touchstart", "touchend", "click", "keydown"];
     const options: AddEventListenerOptions = { capture: true, passive: true };
 
-    events.forEach((eventName) => window.addEventListener(eventName, unlock, options));
+    events.forEach((eventName) => document.addEventListener(eventName, unlock, options));
 
     return () => {
-      events.forEach((eventName) => window.removeEventListener(eventName, unlock, options));
+      events.forEach((eventName) => document.removeEventListener(eventName, unlock, options));
     };
   }, [isPlaying, startMusic]);
 
   useEffect(() => {
     return () => {
-      audioRef.current?.pause();
+      const audio = audioRef.current;
+      audio?.pause();
+      audio?.remove();
     };
   }, []);
 
-  const toggleMusic = () => {
+  const toggleMusic = (event?: PointerEvent<HTMLButtonElement> | MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    const now = Date.now();
+    if (now - lastButtonActionAtRef.current < 500) return;
+    lastButtonActionAtRef.current = now;
+
     const audio = audioRef.current;
     if (!audio || !isPlaying) {
       userPausedRef.current = false;
@@ -66,12 +78,14 @@ const BackgroundMusic = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[2147483647] flex justify-center px-4">
       <button
+        type="button"
+        onPointerDown={toggleMusic}
         onClick={toggleMusic}
         aria-label={isPlaying ? "Senyapkan musik" : "Ketuk untuk nyalakan musik"}
         title={isPlaying ? "Senyapkan musik" : "Ketuk untuk nyalakan musik"}
-        className={`flex h-11 items-center justify-center gap-2 rounded-full border border-primary/40 bg-card/90 text-primary shadow-lg backdrop-blur transition hover:bg-card ${
+        className={`pointer-events-auto flex min-h-12 touch-manipulation select-none items-center justify-center gap-2 rounded-full border border-primary/40 bg-card/95 text-primary shadow-lg backdrop-blur transition hover:bg-card ${
           isPlaying ? "w-11" : "px-3"
         }`}
       >
