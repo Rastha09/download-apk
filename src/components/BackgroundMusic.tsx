@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import musicAsset from "@/assets/luka-negara.mp3.asset.json";
 
 const BackgroundMusic = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const userPausedRef = useRef(false);
-  const lastButtonActionAtRef = useRef(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [needsUnlock, setNeedsUnlock] = useState(true);
 
-  const startMusic = useCallback((force = false) => {
+  const startMusic = useCallback(async (force = false) => {
     if (userPausedRef.current && !force) return;
 
     let audio = audioRef.current;
@@ -25,20 +25,22 @@ const BackgroundMusic = () => {
     audio.muted = false;
     audio.volume = 0.6;
 
-    const playPromise = audio.play();
-    if (playPromise && typeof playPromise.then === "function") {
-      playPromise
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
-    } else {
+    try {
+      await audio.play();
       setIsPlaying(true);
+      setNeedsUnlock(false);
+    } catch {
+      setIsPlaying(false);
+      setNeedsUnlock(true);
     }
   }, []);
 
   useEffect(() => {
     if (isPlaying || userPausedRef.current) return;
 
-    const unlock = () => startMusic();
+    const unlock = () => {
+      void startMusic();
+    };
     const events: (keyof DocumentEventMap)[] = ["pointerdown", "pointerup", "touchstart", "touchend", "click", "keydown"];
     const options: AddEventListenerOptions = { capture: true, passive: true };
 
@@ -57,31 +59,56 @@ const BackgroundMusic = () => {
     };
   }, []);
 
-  const toggleMusic = (event?: PointerEvent<HTMLButtonElement> | MouseEvent<HTMLButtonElement>) => {
+  const requestMusic = (event: SyntheticEvent) => {
     event?.preventDefault();
     event?.stopPropagation();
 
-    const now = Date.now();
-    if (now - lastButtonActionAtRef.current < 500) return;
-    lastButtonActionAtRef.current = now;
+    userPausedRef.current = false;
+    void startMusic(true);
+  };
+
+  const toggleMusic = (event: SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
 
     const audio = audioRef.current;
     if (!audio || !isPlaying) {
       userPausedRef.current = false;
-      startMusic(true);
+      void startMusic(true);
       return;
     }
 
     userPausedRef.current = true;
     audio.pause();
     setIsPlaying(false);
+    setNeedsUnlock(false);
   };
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[2147483647] flex justify-center px-4">
+    <>
+      {needsUnlock && !isPlaying && (
+        <button
+          type="button"
+          onPointerDown={requestMusic}
+          onTouchStart={requestMusic}
+          onMouseDown={requestMusic}
+          onClick={requestMusic}
+          aria-label="Ketuk layar untuk nyalakan musik"
+          className="fixed inset-0 z-[2147483646] flex touch-manipulation select-none items-end justify-center bg-transparent p-4 pb-20"
+        >
+          <span className="flex min-h-14 items-center justify-center gap-2 rounded-full border border-primary/40 bg-card/95 px-5 text-sm font-semibold text-primary shadow-lg backdrop-blur">
+            <VolumeX className="h-5 w-5" />
+            Ketuk untuk mulai musik
+          </span>
+        </button>
+      )}
+
+      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[2147483647] flex justify-center px-4">
       <button
         type="button"
-        onPointerDown={toggleMusic}
+        onPointerDown={isPlaying ? toggleMusic : requestMusic}
+        onTouchStart={isPlaying ? toggleMusic : requestMusic}
+        onMouseDown={isPlaying ? toggleMusic : requestMusic}
         onClick={toggleMusic}
         aria-label={isPlaying ? "Senyapkan musik" : "Ketuk untuk nyalakan musik"}
         title={isPlaying ? "Senyapkan musik" : "Ketuk untuk nyalakan musik"}
@@ -92,7 +119,8 @@ const BackgroundMusic = () => {
         {isPlaying ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
         {!isPlaying && <span className="text-sm font-semibold">Nyalakan musik</span>}
       </button>
-    </div>
+      </div>
+    </>
   );
 };
 
