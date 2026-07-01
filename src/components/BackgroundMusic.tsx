@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import musicAsset from "@/assets/luka-negara.mp3.asset.json";
 
@@ -59,7 +59,7 @@ const BackgroundMusic = () => {
     };
   }, []);
 
-  const requestMusic = (event: React.SyntheticEvent) => {
+  const requestMusic = (event: SyntheticEvent) => {
     event?.preventDefault();
     event?.stopPropagation();
 
@@ -67,7 +67,7 @@ const BackgroundMusic = () => {
     void startMusic(true);
   };
 
-  const toggleMusic = (event: React.SyntheticEvent) => {
+  const toggleMusic = (event: SyntheticEvent) => {
     event.preventDefault();
     event.stopPropagation();
 
