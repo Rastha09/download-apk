@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import musicAsset from "@/assets/luka-negara.mp3.asset.json";
 
+const MUSIC_URL = musicAsset.url.startsWith("http")
+  ? musicAsset.url
+  : `https://download-apk.lovable.app${musicAsset.url}`;
+
 const BackgroundMusic = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasUnlockedRef = useRef(false);
@@ -70,13 +74,13 @@ const BackgroundMusic = () => {
     <>
       <audio
         ref={audioRef}
-        src={musicAsset.url}
+        src={MUSIC_URL}
         loop
         autoPlay
         muted={muted}
         playsInline
         preload="auto"
-        className="hidden"
+        className="sr-only"
       />
       <button
         onClick={toggleMute}
