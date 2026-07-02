@@ -55,14 +55,16 @@ const BackgroundMusic = () => {
   useEffect(() => {
     const events: (keyof WindowEventMap)[] = ["pointerdown", "touchend", "click", "keydown"];
 
-    const removeListeners = () => {
-      events.forEach((ev) => window.removeEventListener(ev, startFromGesture, true));
-    };
+    let removeListeners = () => {};
 
     const startFromGesture = () => {
       void startMusic().then((success) => {
         if (success) removeListeners();
       });
+    };
+
+    removeListeners = () => {
+      events.forEach((ev) => window.removeEventListener(ev, startFromGesture, true));
     };
 
     events.forEach((ev) => window.addEventListener(ev, startFromGesture, { capture: true, passive: true }));
