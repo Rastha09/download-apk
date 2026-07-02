@@ -68,7 +68,6 @@ const BackgroundMusic = () => {
     events.forEach((ev) => window.addEventListener(ev, startFromGesture, { capture: true, passive: true }));
 
     return () => {
-      setMuted(false);
       removeListeners();
       audioRef.current?.pause();
       audioRef.current?.remove();
