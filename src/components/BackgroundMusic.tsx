@@ -81,11 +81,16 @@ const BackgroundMusic = () => {
 
   const toggleMute = () => {
     const audio = audioRef.current;
-    if (!audio || audio.paused || muted) {
+    if (!audio) {
       void startMusic();
       return;
     }
-
+    if (muted || audio.paused) {
+      audio.muted = false;
+      audio.volume = 0.6;
+      void audio.play().then(() => setMuted(false)).catch(() => void startMusic());
+      return;
+    }
     audio.muted = true;
     setMuted(true);
   };
