@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import musicAsset from "@/assets/luka-negara.mp3.asset.json";
 
@@ -8,81 +8,92 @@ const MUSIC_URL = musicAsset.url.startsWith("http")
 
 const BackgroundMusic = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const hasUnlockedRef = useRef(false);
+  const playAttemptRef = useRef<Promise<boolean> | null>(null);
   const [muted, setMuted] = useState(true);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+  const getAudio = useCallback(() => {
+    if (audioRef.current) return audioRef.current;
+
+    const audio = new Audio(MUSIC_URL);
     audio.volume = 0.6;
-    audio.muted = true;
-    audio.play().catch(() => {});
+    audio.loop = true;
+    audio.preload = "auto";
+    audio.setAttribute("playsinline", "true");
+    audio.style.display = "none";
+    document.body.appendChild(audio);
+    audioRef.current = audio;
 
-    const unmute = () => {
-      if (hasUnlockedRef.current) return;
-      hasUnlockedRef.current = true;
-      audio.muted = false;
-      audio.volume = 0.6;
-      const p = audio.play();
-      if (p && typeof p.then === "function") p.catch(() => {});
-      setMuted(false);
-      removeListeners();
+    return audio;
+  }, []);
+
+  const startMusic = useCallback(() => {
+    if (playAttemptRef.current) return playAttemptRef.current;
+
+    const audio = getAudio();
+    audio.muted = false;
+    audio.volume = 0.6;
+
+    const playPromise = audio
+      .play()
+      .then(() => {
+        setMuted(false);
+        return true;
+      })
+      .catch(() => {
+        audio.muted = true;
+        setMuted(true);
+        return false;
+      })
+      .finally(() => {
+        playAttemptRef.current = null;
+      });
+
+    playAttemptRef.current = playPromise;
+    return playPromise;
+  }, [getAudio]);
+
+  useEffect(() => {
+    const events: (keyof WindowEventMap)[] = ["pointerdown", "touchend", "click", "keydown"];
+
+    let removeListeners = () => {};
+
+    const startFromGesture = (event: Event) => {
+      if ((event.target as Element | null)?.closest('[data-music-control="true"]')) return;
+
+      void startMusic().then((success) => {
+        if (success) removeListeners();
+      });
     };
 
-    const events: (keyof WindowEventMap)[] = [
-      "click",
-      "touchstart",
-      "touchend",
-      "pointerdown",
-      "keydown",
-      "scroll",
-      "wheel",
-    ];
-    const removeListeners = () => {
-      events.forEach((ev) => window.removeEventListener(ev, unmute));
+    removeListeners = () => {
+      events.forEach((ev) => window.removeEventListener(ev, startFromGesture, true));
     };
-    events.forEach((ev) =>
-      window.addEventListener(ev, unmute, { passive: true })
-    );
+
+    events.forEach((ev) => window.addEventListener(ev, startFromGesture, { capture: true, passive: true }));
 
     return () => {
       removeListeners();
+      audioRef.current?.pause();
+      audioRef.current?.remove();
+      audioRef.current = null;
     };
-  }, []);
+  }, [startMusic]);
 
   const toggleMute = () => {
     const audio = audioRef.current;
-    if (!audio) return;
-    if (!hasUnlockedRef.current) {
-      hasUnlockedRef.current = true;
-      audio.muted = false;
-      audio.volume = 0.6;
-      setMuted(false);
-      audio.play().catch(() => {});
+    if (!audio || audio.paused || muted) {
+      void startMusic();
       return;
     }
-    const next = !audio.muted;
-    audio.muted = next;
-    setMuted(next);
-    if (!next) {
-      audio.volume = 0.6;
-      audio.play().catch(() => {});
-    }
+
+    audio.muted = true;
+    setMuted(true);
   };
 
   return (
     <>
-      <audio
-        ref={audioRef}
-        src={MUSIC_URL}
-        loop
-        autoPlay
-        muted={muted}
-        playsInline
-        preload="auto"
-        className="sr-only"
-      />
       <button
+        data-music-control="true"
         onClick={toggleMute}
         aria-label={muted ? "Ketuk untuk nyalakan musik" : "Senyapkan musik"}
         title={muted ? "Ketuk untuk nyalakan musik" : "Senyapkan musik"}
