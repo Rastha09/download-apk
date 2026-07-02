@@ -57,7 +57,9 @@ const BackgroundMusic = () => {
 
     let removeListeners = () => {};
 
-    const startFromGesture = () => {
+    const startFromGesture = (event: Event) => {
+      if ((event.target as Element | null)?.closest('[data-music-control="true"]')) return;
+
       void startMusic().then((success) => {
         if (success) removeListeners();
       });
@@ -91,6 +93,7 @@ const BackgroundMusic = () => {
   return (
     <>
       <button
+        data-music-control="true"
         onClick={toggleMute}
         aria-label={muted ? "Ketuk untuk nyalakan musik" : "Senyapkan musik"}
         title={muted ? "Ketuk untuk nyalakan musik" : "Senyapkan musik"}
