@@ -67,6 +67,9 @@ export default function TutorialPage() {
 
   useEffect(() => {
     fetchTutorials();
+    return () => {
+      window.dispatchEvent(new Event("bgm:unduck"));
+    };
   }, []);
 
   const handleUpload = async (e: React.FormEvent) => {
