@@ -67,6 +67,9 @@ export default function TutorialPage() {
 
   useEffect(() => {
     fetchTutorials();
+    return () => {
+      window.dispatchEvent(new Event("bgm:unduck"));
+    };
   }, []);
 
   const handleUpload = async (e: React.FormEvent) => {
@@ -236,11 +239,17 @@ export default function TutorialPage() {
                         controls
                         autoPlay
                         playsInline
+                        onPlay={() => window.dispatchEvent(new Event("bgm:duck"))}
+                        onPause={() => window.dispatchEvent(new Event("bgm:unduck"))}
+                        onEnded={() => window.dispatchEvent(new Event("bgm:unduck"))}
                         className="w-full h-full object-contain"
                       />
                     ) : (
                       <button
-                        onClick={() => setActiveId(t.id)}
+                        onClick={() => {
+                          window.dispatchEvent(new Event("bgm:duck"));
+                          setActiveId(t.id);
+                        }}
                         className="w-full h-full flex items-center justify-center group"
                         aria-label="Play video"
                       >
