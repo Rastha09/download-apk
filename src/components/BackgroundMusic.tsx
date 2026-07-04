@@ -71,8 +71,28 @@ const BackgroundMusic = () => {
 
     events.forEach((ev) => window.addEventListener(ev, startFromGesture, { capture: true, passive: true }));
 
+    const wasUnmutedBeforeDuck = { current: false };
+    const handleDuck = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      wasUnmutedBeforeDuck.current = !audio.muted && !audio.paused;
+      audio.muted = true;
+      setMuted(true);
+    };
+    const handleUnduck = () => {
+      const audio = audioRef.current;
+      if (!audio || !wasUnmutedBeforeDuck.current) return;
+      audio.muted = false;
+      audio.volume = 0.6;
+      void audio.play().then(() => setMuted(false)).catch(() => {});
+    };
+    window.addEventListener("bgm:duck", handleDuck);
+    window.addEventListener("bgm:unduck", handleUnduck);
+
     return () => {
       removeListeners();
+      window.removeEventListener("bgm:duck", handleDuck);
+      window.removeEventListener("bgm:unduck", handleUnduck);
       audioRef.current?.pause();
       audioRef.current?.remove();
       audioRef.current = null;
