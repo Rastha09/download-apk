@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Package, Upload, Moon, Sun, Globe, HelpCircle, Info, LogIn, LogOut, Check, Shield, Gem, KeyRound } from "lucide-react";
+import { Home, Package, Upload, Moon, Sun, Globe, HelpCircle, Info, LogIn, LogOut, Check, Shield, Gem, KeyRound, PlayCircle } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -38,6 +38,7 @@ export function SideDrawer({ open, onClose }: SideDrawerProps) {
     { icon: Home, label: t("drawer.home"), href: "/" },
     { icon: Package, label: t("drawer.allApks"), href: "/" },
     { icon: Gem, label: t("drawer.donationApks"), href: "/donasi" },
+    { icon: PlayCircle, label: t("drawer.tutorial"), href: "/tutorial" },
     ...(isAdmin ? [{ icon: Upload, label: t("drawer.uploadApk"), href: "/" }] : []),
     ...(isAdmin ? [{ icon: KeyRound, label: t("drawer.licenseKeys"), href: "/admin/license-keys" }] : []),
     ...(isSuperAdmin ? [{ icon: Shield, label: t("drawer.manageAdmins"), href: "/manage-admins" }] : []),
