@@ -14,6 +14,7 @@ import ManageAdmins from "./pages/ManageAdmins";
 import DonationPage from "./pages/DonationPage";
 import ManageLicenseKeys from "./pages/ManageLicenseKeys";
 import NotFound from "./pages/NotFound";
+import TutorialPage from "./pages/TutorialPage";
 import BackgroundMusic from "./components/BackgroundMusic";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/donasi" element={<DonationPage />} />
               <Route path="/manage-admins" element={<ManageAdmins />} />
               <Route path="/admin/license-keys" element={<ManageLicenseKeys />} />
+              <Route path="/tutorial" element={<TutorialPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
