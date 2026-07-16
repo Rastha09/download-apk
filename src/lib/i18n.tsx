@@ -123,7 +123,7 @@ const dict = {
     "about.featuresTitle": "Key Features",
     "about.feature1": "Upload APK/APKS files up to 600MB",
     "about.feature2": "Automatic icon extraction from APK files",
-    "about.feature3": "Direct downloads with no ads",
+    "about.feature3": "Download via a short ad page (free APKs)",
     "about.feature4": "App search & filtering",
     "about.feature5": "Cyber dark theme with interactive particles",
     "about.feature6": "Responsive on all devices",
