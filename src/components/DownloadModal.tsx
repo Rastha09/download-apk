@@ -94,8 +94,8 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
                   </>
                 ) : (
                   <>
-                    <span className="text-primary">Siap diunduh!</span>{" "}
-                    Klik tombol di bawah untuk memulai unduhan langsung tanpa iklan.
+                    <span className="text-primary">Hampir siap!</span>{" "}
+                    Kamu akan diarahkan ke halaman iklan sebentar dulu. Tonton iklannya ya, biar semua APK di sini tetap gratis. 🙏
                   </>
                 )}
               </p>
