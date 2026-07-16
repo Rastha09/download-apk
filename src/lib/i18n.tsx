@@ -149,6 +149,16 @@ const dict = {
     "apk.notFoundHint": "Try another keyword",
     "apk.emptyHint": "Upload the first APK to get started",
 
+    "download.title": "Download",
+    "download.freeMsg.highlight": "Almost ready!",
+    "download.freeMsg.body": "You'll be sent to a short ad page first. Please watch the ad — it keeps every APK here free. 🙏",
+    "download.donationMsg.highlight": "Thank you for your support.",
+    "download.donationMsg.body": "Your file will download directly with no ads.",
+    "download.starting": "Starting download…",
+    "download.preparing": "Preparing download…",
+    "download.button": "Start Download",
+    "download.cancel": "Cancel",
+
     "footer.rights": "All Rights Reserved",
   },
 } as const;
