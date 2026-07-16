@@ -9,4 +9,4 @@ export const LICENSE_KEY_REQUIRED = false;
  * Saat `true`, download APK gratis akan diarahkan melalui Safelinku
  * (monetisasi iklan). Set ke `false` untuk download langsung tanpa iklan.
  */
-export const SAFELINK_REQUIRED = false;
+export const SAFELINK_REQUIRED = true;
