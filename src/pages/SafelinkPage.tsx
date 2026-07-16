@@ -156,7 +156,7 @@ export default function SafelinkPage() {
             <div className="flex items-center justify-center gap-2 mb-6 px-3 py-2 rounded-lg bg-secondary">
               <Shield className="w-4 h-4 text-primary" />
               <span className="text-xs text-secondary-foreground font-medium">
-                File telah diverifikasi dan aman untuk diunduh
+                File sudah dicek dan 100% aman untuk perangkat kamu
               </span>
             </div>
 
@@ -166,7 +166,7 @@ export default function SafelinkPage() {
                 <div className="flex items-center justify-center gap-2 text-muted-foreground">
                   <Clock className="w-5 h-5" />
                   <span className="text-sm">
-                    Link download tersedia dalam{" "}
+                    Tombol download muncul dalam{" "}
                     <span className="font-bold text-foreground text-lg">{countdown}</span> detik
                   </span>
                 </div>
@@ -181,8 +181,8 @@ export default function SafelinkPage() {
                   />
                 </div>
 
-                <p className="text-xs text-muted-foreground text-center">
-                  Mohon tunggu, halaman ini untuk mendukung layanan tetap gratis.
+                <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                  Tonton iklan sebentar ya — dukungan kamu bikin semua APK di sini tetap gratis tanpa biaya. 🙏
                 </p>
               </div>
             ) : (
@@ -190,14 +190,18 @@ export default function SafelinkPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                className="space-y-3"
               >
                 <Button
                   onClick={handleDownload}
                   className="w-full h-12 text-base font-semibold gradient-success hover:opacity-90 transition-opacity"
                 >
                   <Download className="w-5 h-5 mr-2" />
-                  Download Sekarang
+                  Lanjutkan ke Download
                 </Button>
+                <p className="text-[11px] text-muted-foreground text-center">
+                  Kamu akan diarahkan sebentar melalui halaman iklan sebelum file diunduh.
+                </p>
               </motion.div>
             )}
           </div>
