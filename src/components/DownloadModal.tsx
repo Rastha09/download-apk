@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Download, X, Loader2, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useCallback } from "react";
+import { useI18n } from "@/lib/i18n";
 
 interface DownloadModalProps {
   isOpen: boolean;
