@@ -73,6 +73,17 @@ const dict = {
     "apk.notFoundHint": "Coba kata kunci lain",
     "apk.emptyHint": "Upload APK pertama untuk memulai",
 
+    // Download Modal
+    "download.title": "Unduh",
+    "download.freeMsg.highlight": "Hampir siap!",
+    "download.freeMsg.body": "Kamu akan diarahkan ke halaman iklan sebentar dulu. Tonton iklannya ya, biar semua APK di sini tetap gratis. 🙏",
+    "download.donationMsg.highlight": "Terima kasih atas dukungan Anda.",
+    "download.donationMsg.body": "File akan diunduh langsung tanpa iklan.",
+    "download.starting": "Memulai unduhan…",
+    "download.preparing": "Mempersiapkan unduhan…",
+    "download.button": "Mulai Download",
+    "download.cancel": "Batal",
+
     // Footer
     "footer.rights": "All Rights Reserved",
   },
@@ -137,6 +148,16 @@ const dict = {
     "apk.empty": "No APKs Yet",
     "apk.notFoundHint": "Try another keyword",
     "apk.emptyHint": "Upload the first APK to get started",
+
+    "download.title": "Download",
+    "download.freeMsg.highlight": "Almost ready!",
+    "download.freeMsg.body": "You'll be sent to a short ad page first. Please watch the ad — it keeps every APK here free. 🙏",
+    "download.donationMsg.highlight": "Thank you for your support.",
+    "download.donationMsg.body": "Your file will download directly with no ads.",
+    "download.starting": "Starting download…",
+    "download.preparing": "Preparing download…",
+    "download.button": "Start Download",
+    "download.cancel": "Cancel",
 
     "footer.rights": "All Rights Reserved",
   },
