@@ -73,6 +73,17 @@ const dict = {
     "apk.notFoundHint": "Coba kata kunci lain",
     "apk.emptyHint": "Upload APK pertama untuk memulai",
 
+    // Download Modal
+    "download.title": "Unduh",
+    "download.freeMsg.highlight": "Hampir siap!",
+    "download.freeMsg.body": "Kamu akan diarahkan ke halaman iklan sebentar dulu. Tonton iklannya ya, biar semua APK di sini tetap gratis. 🙏",
+    "download.donationMsg.highlight": "Terima kasih atas dukungan Anda.",
+    "download.donationMsg.body": "File akan diunduh langsung tanpa iklan.",
+    "download.starting": "Memulai unduhan…",
+    "download.preparing": "Mempersiapkan unduhan…",
+    "download.button": "Mulai Download",
+    "download.cancel": "Batal",
+
     // Footer
     "footer.rights": "All Rights Reserved",
   },
