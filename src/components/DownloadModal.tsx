@@ -85,19 +85,19 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
               </div>
 
               <h3 className="text-xl font-bold text-foreground text-center mb-2 uppercase tracking-wide">
-                Unduh {appName}
+                {t("download.title")} {appName}
               </h3>
 
               <p className="text-sm text-muted-foreground text-center leading-relaxed mb-6 font-mono">
                 {isDonation ? (
                   <>
-                    <span className="text-primary">Terima kasih atas dukungan Anda.</span>{" "}
-                    File akan diunduh langsung tanpa iklan.
+                    <span className="text-primary">{t("download.donationMsg.highlight")}</span>{" "}
+                    {t("download.donationMsg.body")}
                   </>
                 ) : (
                   <>
-                    <span className="text-primary">Hampir siap!</span>{" "}
-                    Kamu akan diarahkan ke halaman iklan sebentar dulu. Tonton iklannya ya, biar semua APK di sini tetap gratis. 🙏
+                    <span className="text-primary">{t("download.freeMsg.highlight")}</span>{" "}
+                    {t("download.freeMsg.body")}
                   </>
                 )}
               </p>
@@ -106,7 +106,7 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
                 <div className="flex flex-col items-center gap-3 py-4">
                   <Loader2 className="w-8 h-8 text-primary animate-spin" />
                   <p className="text-sm text-muted-foreground animate-pulse font-mono">
-                    Memulai unduhan…
+                    {t("download.starting")}
                   </p>
                 </div>
               ) : showCountdown ? (
@@ -129,7 +129,7 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
                     <span className="text-2xl font-bold text-primary font-mono">{countdown}</span>
                   </div>
                   <p className="text-sm text-muted-foreground font-mono animate-pulse">
-                    Mempersiapkan unduhan…
+                    {t("download.preparing")}
                   </p>
                 </div>
               ) : (
@@ -139,7 +139,7 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
                     className="w-full h-12 text-base font-bold uppercase tracking-wider bg-primary text-primary-foreground hover:bg-primary/90 rounded-[4px] transition-all"
                   >
                     <Download className="w-5 h-5 mr-2" />
-                    Mulai Download
+                    {t("download.button")}
                   </Button>
                   <Button
                     variant="ghost"
@@ -147,7 +147,7 @@ export function DownloadModal({ isOpen, appName, iconUrl, isLoading, category = 
                     className="w-full h-10 text-muted-foreground hover:text-foreground"
                   >
                     <X className="w-4 h-4 mr-2" />
-                    Batal
+                    {t("download.cancel")}
                   </Button>
                 </div>
               )}
