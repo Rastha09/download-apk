@@ -246,6 +246,18 @@ const DonationPage = () => {
               </p>
             </div>
 
+            {isAdmin && (
+              <div className="rounded border border-border bg-secondary/40 px-4 py-3 text-sm font-mono text-muted-foreground">
+                <div className="flex items-center gap-2 text-primary font-semibold uppercase tracking-wider mb-1">
+                  <ShieldCheck className="w-4 h-4" />
+                  Admin Access
+                </div>
+                <p>Bypass license aktif</p>
+              </div>
+            )}
+          </div>
+        </section>
+
         {isAdmin ? (
           <section className="space-y-4">
             <ApkList refreshTrigger={refreshTrigger} category="donation" title="Donation APK/APKS" isAdmin />
@@ -259,3 +271,4 @@ const DonationPage = () => {
 };
 
 export default DonationPage;
+
