@@ -165,8 +165,13 @@ const dict = {
     "download.button": "Start Download",
     "download.cancel": "Cancel",
 
+    "adminOnly.title": "Admin Only",
+    "adminOnly.body": "This page is available to admins only. Please sign in as an admin to view the APK list.",
+    "adminOnly.login": "Sign in as Admin",
+
     "footer.rights": "All Rights Reserved",
   },
+
 } as const;
 
 export type TranslationKey = keyof typeof dict["id"];
