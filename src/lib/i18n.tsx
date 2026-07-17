@@ -84,9 +84,15 @@ const dict = {
     "download.button": "Mulai Download",
     "download.cancel": "Batal",
 
+    // Admin only
+    "adminOnly.title": "Khusus Admin",
+    "adminOnly.body": "Halaman ini hanya bisa diakses oleh admin. Silakan login sebagai admin untuk melihat daftar APK.",
+    "adminOnly.login": "Login sebagai Admin",
+
     // Footer
     "footer.rights": "All Rights Reserved",
   },
+
   en: {
     "header.status": "System Online",
     "header.title": "APK Downloader",
