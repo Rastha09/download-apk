@@ -5,6 +5,8 @@ import { Navbar } from "@/components/Navbar";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { ApkList } from "@/components/ApkList";
 import { DonationApkList } from "@/components/DonationApkList";
+import { AdminOnlyNotice } from "@/components/AdminOnlyNotice";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
