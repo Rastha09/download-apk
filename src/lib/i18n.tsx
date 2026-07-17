@@ -84,9 +84,15 @@ const dict = {
     "download.button": "Mulai Download",
     "download.cancel": "Batal",
 
+    // Admin only
+    "adminOnly.title": "Khusus Admin",
+    "adminOnly.body": "Halaman ini hanya bisa diakses oleh admin. Silakan login sebagai admin untuk melihat daftar APK.",
+    "adminOnly.login": "Login sebagai Admin",
+
     // Footer
     "footer.rights": "All Rights Reserved",
   },
+
   en: {
     "header.status": "System Online",
     "header.title": "APK Downloader",
@@ -159,8 +165,13 @@ const dict = {
     "download.button": "Start Download",
     "download.cancel": "Cancel",
 
+    "adminOnly.title": "Admin Only",
+    "adminOnly.body": "This page is available to admins only. Please sign in as an admin to view the APK list.",
+    "adminOnly.login": "Sign in as Admin",
+
     "footer.rights": "All Rights Reserved",
   },
+
 } as const;
 
 export type TranslationKey = keyof typeof dict["id"];

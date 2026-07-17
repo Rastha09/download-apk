@@ -6,6 +6,7 @@ import { ParticleBackground } from "@/components/ParticleBackground";
 import { Navbar } from "@/components/Navbar";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/lib/i18n";
+import { AdminOnlyNotice } from "@/components/AdminOnlyNotice";
 
 const Index = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -26,23 +27,22 @@ const Index = () => {
           <Header />
         </div>
 
-        <div className="space-y-8">
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Upload Form - Only show for admins */}
-            {isAdmin && (
+        {isAdmin ? (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-1">
                 <ApkUploadForm onUploadSuccess={handleUploadSuccess} />
               </div>
-            )}
-
-            {/* APK List */}
-            <div className={isAdmin ? "lg:col-span-2" : "lg:col-span-3"}>
-              <ApkList refreshTrigger={refreshTrigger} isAdmin={isAdmin} category="free" />
+              <div className="lg:col-span-2">
+                <ApkList refreshTrigger={refreshTrigger} isAdmin={isAdmin} category="free" />
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <AdminOnlyNotice />
+        )}
       </div>
+
 
       {/* Footer */}
       <footer className="mt-auto py-6 border-t border-border/30">
