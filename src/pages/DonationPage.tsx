@@ -246,94 +246,12 @@ const DonationPage = () => {
               </p>
             </div>
 
-            {isAdmin ? (
-              <div className="rounded border border-border bg-secondary/40 px-4 py-3 text-sm font-mono text-muted-foreground">
-                <div className="flex items-center gap-2 text-primary font-semibold uppercase tracking-wider mb-1">
-                  <ShieldCheck className="w-4 h-4" />
-                  Admin Access
-                </div>
-                <p>Bypass license aktif</p>
-              </div>
-            ) : LICENSE_KEY_REQUIRED && authorized && (
-              <div className="rounded border border-border bg-secondary/40 px-4 py-3 text-sm font-mono text-muted-foreground">
-                <div className="flex items-center gap-2 text-primary font-semibold uppercase tracking-wider mb-1">
-                  <ShieldCheck className="w-4 h-4" />
-                  License Aktif
-                </div>
-                <p>{licenseKey}</p>
-                {expiryText && <p>Berlaku sampai {expiryText}</p>}
-              </div>
-            )}
-          </div>
-        </section>
-
         {isAdmin ? (
           <section className="space-y-4">
             <ApkList refreshTrigger={refreshTrigger} category="donation" title="Donation APK/APKS" isAdmin />
           </section>
-        ) : checkingSession ? (
-          <section className="max-w-xl mx-auto border border-border bg-card rounded p-5 md:p-6">
-            <div className="flex items-center justify-center gap-3 text-sm font-mono text-muted-foreground">
-              <Loader2 className="w-5 h-5 animate-spin text-primary" />
-              Memeriksa status license...
-            </div>
-          </section>
-        ) : !authorized ? (
-          <section className="max-w-xl mx-auto border border-border bg-card rounded p-5 md:p-6 space-y-5">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded bg-secondary flex items-center justify-center">
-                <KeyRound className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold uppercase tracking-wider text-foreground">Verifikasi License Key</h2>
-                <p className="text-xs text-muted-foreground font-mono">Akses halaman ini memerlukan key yang valid dan belum expired.</p>
-              </div>
-            </div>
-
-            <form onSubmit={validateKey} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="license-key">License Key</Label>
-                <Input
-                  id="license-key"
-                  autoComplete="off"
-                  value={licenseKey}
-                  onChange={(e) => setLicenseKey(e.target.value.toUpperCase())}
-                  placeholder="DEIMOS-XXXXXX-XXXXXX"
-                  className="h-12 font-mono uppercase tracking-wider"
-                  disabled={validating}
-                />
-              </div>
-
-              <div className="rounded border border-border bg-secondary/30 p-4 text-xs font-mono text-muted-foreground space-y-2">
-                <div className="flex items-start gap-2">
-                  <ShieldCheck className="w-4 h-4 mt-0.5 text-primary" />
-                  <p>Key valid akan tersimpan di browser agar tidak perlu input ulang saat refresh halaman.</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 mt-0.5 text-accent" />
-                  <p>Maks. 3 perangkat per key. Browser berbeda di HP yang sama (Chrome, Telegram, Google App) tidak dihitung sebagai perangkat baru. Jika melebihi batas, hubungi admin untuk reset.</p>
-                </div>
-              </div>
-
-              <Button type="submit" disabled={validating} className="w-full h-12 text-base font-bold uppercase tracking-wider">
-                {validating ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Memvalidasi...
-                  </>
-                ) : (
-                  <>
-                    <KeyRound className="w-5 h-5" />
-                    Buka APK Donasi
-                  </>
-                )}
-              </Button>
-            </form>
-          </section>
         ) : (
-          <section className="space-y-4">
-            <DonationApkList refreshTrigger={refreshTrigger} />
-          </section>
+          <AdminOnlyNotice />
         )}
       </main>
     </div>
